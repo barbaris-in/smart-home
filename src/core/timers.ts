@@ -17,4 +17,4 @@ class Timers {
     }
 }
 
-export const timers = new Timers();
+export default new Timers();

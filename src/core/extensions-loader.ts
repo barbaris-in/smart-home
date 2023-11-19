@@ -1,22 +1,24 @@
-import {Extension} from "./extension-interface";// get list of extensions from directory
+import Extension from "./abstract-extension";
 import * as fs from "fs";
 import * as path from "path";
+const logger = require('./logger').logger('extensions-loader');
 
 class ExtensionsLoader {
     private extensions: Extension[] = [];
 
     loadExtensions() {
+        // todo: order extensions by priority
         const normalizedPath: string = path.join(__dirname, '../extensions');
-        console.log('Loading extensions...', normalizedPath);
+        logger.debug('Loading extensions...', normalizedPath);
         fs.readdirSync(normalizedPath).forEach((extensionName: string): void => {
-           console.log("Loading extension:", extensionName);
-           const {extension} = require('../extensions/' + extensionName + '/index.js');
-           if (!(extension instanceof Extension)) {
-               console.error(`Extension "${extensionName}"is not an instance of Extension class`);
+           logger.debug("Loading extension:", {extensionName});
+           const extension = require('../extensions/' + extensionName + '/index.js');
+           if (!(extension.default instanceof Extension)) {
+               logger.error(`Extension "${extensionName}" is not an instance of Extension class`);
                return;
            }
-           console.log("Extension:", extension);
-           this.extensions.push(extension);
+           logger.debug('Extension has been loaded:', {extensionName});
+           this.extensions.push(extension.default);
         });
     }
 
@@ -26,10 +28,10 @@ class ExtensionsLoader {
 
     runExtensions(): void {
         for(const extension of this.extensions) {
-            console.log("Running extension:", extension.getName());
+            logger.debug("Running extension:", {name: extension.getName()});
             extension.run();
         }
     }
 }
 
-export const extensionsLoader = new ExtensionsLoader();
+export default new ExtensionsLoader();

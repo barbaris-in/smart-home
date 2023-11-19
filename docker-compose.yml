@@ -1,0 +1,4 @@
+ services:
+    smart-home:
+        image: barbaris/smart-home:alpha-1
+        container_name: smart-home
