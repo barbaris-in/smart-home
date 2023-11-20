@@ -1,6 +1,6 @@
 import Extension from "../../core/abstract-extension";
 import timers from "../../core/timers";
-const logger = require("../../core/logger").logger('automation1');
+const logger = require("../../core/logger").logger('motion-light-automation');
 import deviceManager from "../../core/device-manager";
 import Bulb from "../../devices/bulb";
 import MotionSensor from "../../devices/motion-sensor";

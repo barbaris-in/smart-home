@@ -5,7 +5,7 @@ const logger = require('../core/logger').logger('devices-motion-sensor');
 export default class MotionSensor extends GenericMqttDevice {
     public readonly type: string = 'motion-sensor';
     // todo: what default value should be here? possibly null? better to initialize it in constructor from cached value
-    private occupancy: boolean | null = false;
+    private occupancy: boolean | null = null;
 
     constructor(protected readonly id: string, protected name: string, protected object: any) {
         super(id, name, object);
