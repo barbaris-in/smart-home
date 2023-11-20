@@ -21,16 +21,18 @@ class AutomationExtension extends Extension {
                     timers.clearTimer(motionDeviceName);
                     const light = deviceManager.getDeviceByName(lightDeviceName);
                     if (light instanceof Bulb) {
+                        logger.debug('Light on', {lightDeviceName});
                         light.turnOn();
                     }
                 });
+
                 motionSensor.onMotionStopped((params: any) => {
                     logger.debug('Motion stopped', {motionDeviceName, params});
                     logger.debug('Set timer for ', timeout, 'seconds');
                     const timer = setTimeout(() => {
-                        logger.debug('Light off', {motionDeviceName, params});
                         const light = deviceManager.getDeviceByName(lightDeviceName);
                         if (light instanceof Bulb) {
+                            logger.debug('Light off', {lightDeviceName});
                             light.turnOff();
                         }
                     }, timeout * 1000);
