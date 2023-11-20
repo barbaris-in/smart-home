@@ -1,6 +1,7 @@
 import Device from "./abscract-device";
 import * as yaml from 'js-yaml';
 import * as fs from 'fs';
+import deviceClassRegistry from "./device-class-registry";
 
 const logger = require("./logger").logger('devices');
 
@@ -69,8 +70,8 @@ class DeviceManager {
         const parsedData: any = yaml.load(data);
         for (const deviceId in parsedData) {
             const deviceName: string = parsedData[deviceId].device.name;
-            const deviceClass = require('../devices/' + parsedData[deviceId].device.type);
-            const device: Device = new deviceClass.default(deviceId, deviceName, parsedData[deviceId].device);
+            const deviceClass = deviceClassRegistry.get(parsedData[deviceId].device.type);
+            const device: Device = new deviceClass(deviceId, deviceName, parsedData[deviceId].device);
             const homeDevice: HomeDevice = new HomeDevice(parsedData[deviceId].source, device);
             this.devicesById[deviceId] = homeDevice;
             this.devicesByName[deviceName] = homeDevice;
