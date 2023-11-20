@@ -1,5 +1,6 @@
 import Extension from "../../core/abstract-extension";
 import {Telegraf} from "telegraf";
+const logger = require('../../core/logger').logger('telegram');
 
 class TelegramBot extends Extension {
     getName(): string {
@@ -12,9 +13,18 @@ class TelegramBot extends Extension {
         })());
 
         bot.launch().then(() => {
-            console.info('Telegram bot has been started');
-            process.once('SIGINT', () => bot.stop('SIGINT'))
-            process.once('SIGTERM', () => bot.stop('SIGTERM'))
+            logger.debug('Telegram bot has been started');
+
+            process.once('SIGINT', () => {
+                bot.stop('SIGINT');
+            });
+
+            process.once('SIGTERM', () => {
+                bot.stop('SIGTERM')
+            })
+        }).catch(reason => {
+            // todo: restart bot if disconnected
+            logger.error(reason);
         });
     }
 }

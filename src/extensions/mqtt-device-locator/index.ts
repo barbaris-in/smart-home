@@ -16,10 +16,12 @@ class MqttExtension extends Extension {
                 logger.debug('Registering device', mqttDevice);
                 if (mqttDevice.definition && mqttDevice.definition.description) {
                     console.log(mqttDevice.definition);
-                    const classFile: string = DeviceClassDecider.getDeviceClass(mqttDevice);
-                    const deviceClass = require('../../devices/' + classFile);
-                    const device = new deviceClass.default(mqttDevice.ieee_address, mqttDevice.friendly_name, mqttDevice);
-                    deviceManager.addDevice(device, 'mqtt');
+                    if (!deviceManager.hasDevice(mqttDevice.ieee_address)) {
+                        const classFile: string = DeviceClassDecider.getDeviceClass(mqttDevice);
+                        const deviceClass = require('../../devices/' + classFile);
+                        const device = new deviceClass.default(mqttDevice.ieee_address, mqttDevice.friendly_name, mqttDevice);
+                        deviceManager.addDevice(device, 'mqtt');
+                    }
                 }
             }
             deviceManager.saveDevices();

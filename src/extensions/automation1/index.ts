@@ -14,7 +14,7 @@ class AutomationExtension extends Extension {
         logger.debug("Running automation1");
         const automate = function(motionDeviceName: string, lightDeviceName: string, timeout: number = 0) {
             const motionSensor = deviceManager.getDeviceByName(motionDeviceName);
-
+            logger.debug('Automate', {motionDeviceName, lightDeviceName, timeout});
             if (motionSensor instanceof MotionSensor) {
                 motionSensor.onMotionDetected((params: any) => {
                     logger.debug('Motion detected', {motionDeviceName, params});
@@ -26,6 +26,7 @@ class AutomationExtension extends Extension {
                 });
                 motionSensor.onMotionStopped((params: any) => {
                     logger.debug('Motion stopped', {motionDeviceName, params});
+                    logger.debug('Set timer for ', timeout, 'seconds');
                     const timer = setTimeout(() => {
                         logger.debug('Light off', {motionDeviceName, params});
                         const light = deviceManager.getDeviceByName(lightDeviceName);
@@ -35,24 +36,10 @@ class AutomationExtension extends Extension {
                     }, timeout * 1000);
                     timers.refreshTimer(motionDeviceName, timer);
                 });
-                // motionSensor.onStatusChanged((params: any) => {
-                //     logger.debug('Moving alert', {motionDeviceName, params});
-                //     if (undefined === params.occupancy) {
-                //         logger.error('Invalid motion sensor status', {motionDeviceName, params});
-                //         return;
-                //     }
-                //
-                //     // if occupancy just changed
-                //     if (motionSensor.setOccupancy(params.occupancy)) {
-                //         if (params.occupancy) {
-                //         } else {
-                //         }
-                //     }
-                // });
             }
         }
 
-        automate('Hallway Motion Sensor', 'Hallway Light');
+        automate('Hallway Motion Sensor', 'Hallway Light', 60);
         automate('Bathroom Motion Sensor', 'Bathroom Mirror Light', 60*10);
     }
 }

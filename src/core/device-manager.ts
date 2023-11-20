@@ -1,6 +1,7 @@
 import Device from "./abscract-device";
 import * as yaml from 'js-yaml';
 import * as fs from 'fs';
+
 const logger = require("./logger").logger('devices');
 
 interface ListOfDevices {
@@ -17,17 +18,15 @@ class DeviceManager {
     protected devicesByName: ListOfDevices = {};
 
     addDevice(device: Device, source: string): void {
-        const deviceId = device.getId();
+        const deviceId: string = device.getId();
         if (this.hasDevice(deviceId)) {
             // todo: updated device.
             // todo: optionally check if device changed
         } else {
-            // todo: add new device. mark it as new
+            const homeDevice: HomeDevice = new HomeDevice(source, device);
+            this.devicesById[device.getId()] = homeDevice;
+            this.devicesByName[device.getName()] = homeDevice;
         }
-
-        const homeDevice: HomeDevice = new HomeDevice(source, device);
-        this.devicesById[device.getId()] = homeDevice;
-        this.devicesByName[device.getName()] = homeDevice;
     }
 
     hasDevice(id: string): boolean {
@@ -39,7 +38,7 @@ class DeviceManager {
     }
 
     getDeviceByName(name: string): Device | null {
-        return this.devicesByName[name] ? this.devicesByName[name].device :  null;
+        return this.devicesByName[name] ? this.devicesByName[name].device : null;
     }
 
     getDevices(): ListOfDevices {
@@ -47,6 +46,9 @@ class DeviceManager {
     }
 
     saveDevices(): void {
+        if (!fs.existsSync('config/cache')) {
+            fs.mkdirSync('config/cache');
+        }
         // todo: add comment to file not to edit it manually
         fs.writeFile('config/cache/devices.yaml', yaml.dump(this.devicesById), (err) => {
             if (err) {

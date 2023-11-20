@@ -14,7 +14,7 @@ export default abstract class Device {
         return this.name;
     }
 
-    emit(event: string, args: any): void {
+    emit(event: string, args: any = {}): void {
         actions.getCallbacks(this.getName(), event).forEach((callback: Function): void => {
             callback(args);
         });
