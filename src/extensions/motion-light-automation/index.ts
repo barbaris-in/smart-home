@@ -28,7 +28,8 @@ class AutomationExtension extends Extension {
 
                 motionSensor.onMotionStopped((params: any) => {
                     logger.debug('Motion stopped', {motionDeviceName, params});
-                    logger.debug('Set timer for ', timeout, 'seconds');
+                    logger.debug('Set timer', {motionDeviceName, timeout});
+                    // todo: move timer to the light device
                     const timer = setTimeout(() => {
                         const light = deviceManager.getDeviceByName(lightDeviceName);
                         if (light instanceof Bulb) {
