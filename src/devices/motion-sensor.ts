@@ -1,5 +1,4 @@
 import GenericMqttDevice from "./generic-mqtt-device";
-import timers from "../core/timers";
 const logger = require('../core/logger').logger('devices-motion-sensor');
 
 export default class MotionSensor extends GenericMqttDevice {
@@ -27,7 +26,6 @@ export default class MotionSensor extends GenericMqttDevice {
             if (occupancy) {
                 logger.debug('Motion detected', {deviceName: this.getName()});
                 this.emit('motion_detected')
-                timers.clearTimer(this.getName());
             } else {
                 logger.debug('Motion stopped', {deviceName: this.getName()});
                 this.emit('motion_stopped');

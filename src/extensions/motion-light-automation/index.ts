@@ -1,5 +1,4 @@
 import Extension from "../../core/abstract-extension";
-import timers from "../../core/timers";
 const logger = require("../../core/logger").logger('motion-light-automation');
 import deviceManager from "../../core/device-manager";
 import Bulb from "../../devices/bulb";
@@ -18,7 +17,6 @@ class AutomationExtension extends Extension {
             if (motionSensor instanceof MotionSensor) {
                 motionSensor.onMotionDetected((params: any) => {
                     logger.debug('Motion detected', {motionDeviceName, params});
-                    timers.clearTimer(motionDeviceName);
                     const light = deviceManager.getDeviceByName(lightDeviceName);
                     if (light instanceof Bulb) {
                         logger.debug('Light on', {lightDeviceName});
@@ -28,16 +26,11 @@ class AutomationExtension extends Extension {
 
                 motionSensor.onMotionStopped((params: any) => {
                     logger.debug('Motion stopped', {motionDeviceName, params});
-                    logger.debug('Set timer', {motionDeviceName, timeout});
-                    // todo: move timer to the light device
-                    const timer = setTimeout(() => {
-                        const light = deviceManager.getDeviceByName(lightDeviceName);
-                        if (light instanceof Bulb) {
-                            logger.debug('Light off', {lightDeviceName});
-                            light.turnOff();
-                        }
-                    }, timeout * 1000);
-                    timers.refreshTimer(motionDeviceName, timer);
+                    const light = deviceManager.getDeviceByName(lightDeviceName);
+                    if (light instanceof Bulb) {
+                        logger.debug('Light off', {lightDeviceName});
+                        light.turnOffAfter(timeout);
+                    }
                 });
             }
         }
