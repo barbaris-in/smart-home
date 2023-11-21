@@ -3,6 +3,7 @@ const logger = require("../../core/logger").logger('motion-light-automation');
 import deviceManager from "../../core/device-manager";
 import Bulb from "../../devices/bulb";
 import MotionSensor from "../../devices/motion-sensor";
+import YeelightWifiStrip from "../../devices/yeelight-wifi-strip";
 
 class AutomationExtension extends Extension {
     getName(): string {
@@ -22,6 +23,10 @@ class AutomationExtension extends Extension {
                         logger.debug('Light on', {lightDeviceName});
                         light.turnOn();
                     }
+                    if (light instanceof YeelightWifiStrip) {
+                        logger.debug('Light off', {lightDeviceName});
+                        light.turnOn();
+                    }
                 });
 
                 motionSensor.onMotionStopped((params: any) => {
@@ -31,12 +36,17 @@ class AutomationExtension extends Extension {
                         logger.debug('Light off', {lightDeviceName});
                         light.turnOffAfter(timeout);
                     }
+                    if (light instanceof YeelightWifiStrip) {
+                        logger.debug('Light off', {lightDeviceName});
+                        light.turnOffAfter(timeout);
+                    }
                 });
             }
         }
 
         automate('Hallway Motion Sensor', 'Hallway Light', 60);
         automate('Bathroom Motion Sensor', 'Bathroom Mirror Light', 60*10);
+        automate('Kitchen Motion Sensor', '0x0000000008016701', 60*10);
     }
 }
 
