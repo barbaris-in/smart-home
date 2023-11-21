@@ -5,16 +5,21 @@ import deviceClassRegistry from "../../core/device-class-registry";
 
 const logger = require("../../core/logger").logger('mqtt-device-discovery');
 
-class MqttExtension extends Extension {
+class MqttDeviceLocator extends Extension {
     getName(): string {
         return 'mqtt-device-discovery';
     }
 
+    dependsOn(): string[] {
+        return ['mqtt'];
+    }
+
     run(): void {
-        // todo: remove device creation after extensions order is implemented. device should be created by mqtt extension already
-        const mqttDeviceClass = deviceClassRegistry.get('mqtt-device');
-        const mqttDevice = new mqttDeviceClass('mqtt', 'MQTT');
-        // const mqttDevice = deviceManager.getDeviceByName('MQTT');
+        const mqttDevice = deviceManager.getDeviceByName('MQTT');
+        if (!mqttDevice) {
+            logger.error('MQTT device not found');
+            return;
+        }
         mqttDevice.on('zigbee2mqtt/bridge/devices', (mqttDevices: any): void => {
             for (const mqttDevice of mqttDevices) {
                 logger.debug('Registering device', mqttDevice);
@@ -33,4 +38,4 @@ class MqttExtension extends Extension {
     }
 }
 
-export default new MqttExtension();
+export default new MqttDeviceLocator();

@@ -9,6 +9,10 @@ class Index extends Extension {
         return 'sun-telegram-notification';
     }
 
+    dependsOn(): string[] {
+        return ['sun', 'telegram-bot'];
+    }
+
     run(): void {
         const chatId: number = parseFloat(process.env.TELEGRAM_CHAT_ID || '');
         const sun = deviceManager.getDeviceByName('Sun');
