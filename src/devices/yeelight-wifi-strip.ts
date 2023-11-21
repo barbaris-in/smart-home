@@ -47,10 +47,12 @@ export default class YeelightWifiStrip extends GenericDevice {
     }
 
     toggle(): boolean {
-        return false;
+        timers.clearTimer(this.getName());
+        return this.sendCommand({"id": 1, "method": "toggle", "params": []});
     }
 
     turnOn(): boolean {
+        timers.clearTimer(this.getName());
         return this.sendCommand({"id": 1, "method": "set_power", "params": ["on", "smooth", 500]});
     }
 
