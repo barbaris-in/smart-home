@@ -5,7 +5,7 @@ const loggers = new Map<string, winston.Logger>();
 export const logger = function (channel: string): winston.Logger {
     if (!loggers.has(channel)) {
         const logger: winston.Logger = winston.createLogger({
-            level: 'debug',
+            level: process.env.LOG_LEVEL || 'info',
             defaultMeta: {channel},
             format: winston.format.combine(
                 winston.format.timestamp({format: 'YYYY-MM-DD HH:mm:ss'}),
