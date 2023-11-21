@@ -11,6 +11,6 @@ COPY dist /app/dist
 
 RUN npm install --omit=dev
 
-ENTRYPOINT ["node", "index.js"]
+ENTRYPOINT ["npm", "run", "start"]
 
 EXPOSE 3000
