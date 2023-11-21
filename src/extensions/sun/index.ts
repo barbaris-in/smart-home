@@ -4,10 +4,12 @@ import {scheduleJob} from "node-schedule";
 import GenericDevice from "../../devices/generic-device";
 import deviceManager from "../../core/device-manager";
 import Device from "../../core/abscract-device";
+import {DeviceClassRegistry} from "../../core/device-class-registry";
 
 const logger = require("../../core/logger").logger('sun');
 
-class Sun extends GenericDevice {
+export class SunDevice extends GenericDevice {
+    public readonly type: string = 'sun';
 }
 
 class SunExtension extends Extension {
@@ -15,9 +17,14 @@ class SunExtension extends Extension {
         return "sun";
     }
 
+    registerDeviceClasses(deviceClassRegistry: DeviceClassRegistry) {
+        super.registerDeviceClasses(deviceClassRegistry);
+        deviceClassRegistry.register('sun', SunDevice);
+    }
+
     run(): void {
         logger.debug("Running sun");
-        deviceManager.addDevice(new Sun('sun', 'Sun'), 'sun');
+        deviceManager.addDevice(new SunDevice('sun', 'Sun'), 'sun');
         this.setupSunEvent();
     }
 
@@ -27,7 +34,7 @@ class SunExtension extends Extension {
         scheduleJob(nextEvent.time, (): void => {
             logger.debug('Sun event fired', {event: nextEvent});
             const sun: Device | null = deviceManager.getDeviceByName('Sun');
-            if (sun instanceof Sun) {
+            if (sun instanceof SunDevice) {
                 sun.emit(nextEvent.type, nextEvent);
             } else {
                 logger.error('Sun not found');
@@ -35,6 +42,16 @@ class SunExtension extends Extension {
             this.setupSunEvent();
         });
     }
+
+    getNextEventDummy(type: string): any {
+        const now = new Date();
+        now.setSeconds(now.getSeconds() + 10);
+        return {
+            type: type,
+            time: now
+        };
+    }
+
 
     getNextEvent(): any {
         const now: Date = new Date();
@@ -60,4 +77,4 @@ class SunExtension extends Extension {
     }
 }
 
-// export default new SunExtension();
+export default new SunExtension();

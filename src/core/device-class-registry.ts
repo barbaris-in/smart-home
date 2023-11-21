@@ -26,8 +26,7 @@ export class DeviceClassRegistry {
 
     public register(alias: string, className: any): boolean {
         if (this.has(alias)) {
-            logger.error(`Device class with alias ${alias} already registered`);
-            return false;
+            throw new Error(`Device class with alias ${alias} already registered`);
         }
 
         this.classes[alias] = className;

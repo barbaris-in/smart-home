@@ -11,8 +11,6 @@ COPY dist /app/dist
 
 RUN npm install --omit=dev
 
-COPY .env /app
-
 ENTRYPOINT ["node", "index.js"]
 
 EXPOSE 3000
