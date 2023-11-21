@@ -2,6 +2,7 @@ import Extension from "./abstract-extension";
 import * as fs from "fs";
 import * as path from "path";
 const logger = require('./logger').logger('extensions-loader');
+import deviceClassRegistry from "./device-class-registry";
 
 class ExtensionsLoader {
     private extensions: Extension[] = [];
@@ -22,8 +23,11 @@ class ExtensionsLoader {
         });
     }
 
-    getExtensions() {
-        return this.extensions;
+    public registerDeviceClasses(): void {
+        for(const extension of this.extensions) {
+            logger.debug("Registering device classes from extension:", {name: extension.getName()});
+            extension.registerDeviceClasses(deviceClassRegistry);
+        }
     }
 
     runExtensions(): void {

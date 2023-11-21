@@ -4,10 +4,10 @@ import Device from "./abscract-device";
 
 const logger = require('./logger').logger('device-class-registry');
 
-class DeviceClassRegistry {
+export class DeviceClassRegistry {
     private classes: { [alias: string]: any } = {};
 
-    public loadDefaultDeviceClasses(): void {
+    public registerDefaultDeviceClasses(): void {
         fs.readdirSync(path.join(__dirname, '../devices')).forEach((filename: string): void => {
             if (filename.endsWith('.js')) {
                 try {

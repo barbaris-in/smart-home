@@ -1,29 +1,47 @@
 import Extension from "../../core/abstract-extension";
 import * as mqtt from "mqtt";
 import {MqttClient} from "mqtt";
-import {eventsEmitter} from "../../core/events-emitter";
 import deviceManager from "../../core/device-manager";
 import Device from "../../core/abscract-device";
+import {DeviceClassRegistry} from "../../core/device-class-registry";
+import GenericDevice from "../../devices/generic-device";
 
 const logger = require("../../core/logger").logger('mqtt');
 const mqttHost: string | undefined = process.env.MQTT_HOST;
 const mqttPort: string = process.env.MQTT_PORT || '1883';
 
+class MqttDevice extends GenericDevice {
+    public readonly type: string = 'mqtt-device';
+}
+
 class MqttExtension extends Extension {
-    public readonly client: MqttClient;
+    public client: MqttClient | null = null;
 
     constructor() {
         super();
-        const brokerAddress: string = `mqtt://${mqttHost}:${mqttPort}`;
-        logger.debug('Connecting to MQTT', {brokerAddress});
-        this.client = mqtt.connect(brokerAddress);
     }
 
     getName(): string {
         return 'mqtt';
     }
 
+    registerDeviceClasses(deviceClassRegistry: DeviceClassRegistry) {
+        super.registerDeviceClasses(deviceClassRegistry);
+        deviceClassRegistry.register('mqtt-device', MqttDevice);
+    }
+
     run(): void {
+        const device = new MqttDevice('mqtt', 'MQTT');
+        deviceManager.addDevice(device, 'mqtt');
+        const brokerAddress: string = `mqtt://${mqttHost}:${mqttPort}`;
+        logger.debug('Connecting to MQTT', {brokerAddress});
+        this.client = mqtt.connect(brokerAddress);
+        const mqttDevice = deviceManager.getDeviceByName('MQTT');
+        if (!(mqttDevice instanceof MqttDevice)) {
+            logger.error('Could not find mqtt');
+            return;
+        }
+
         // Subscribe to all messages by using the '#' wildcard
         this.client.subscribe('zigbee2mqtt/#', (err) => {
             if (err) {
@@ -47,17 +65,14 @@ class MqttExtension extends Extension {
                 case 'bridge':
                     switch (topics[2]) {
                         case 'devices':
-                            //todo: emit device events instead of eventsEmitter
-                            eventsEmitter.emit(topic, eventParams);
+                            mqttDevice.emit(topic, eventParams);
                             break;
                     }
                     break;
                 default:
                     const device: Device | null = deviceManager.getDeviceByName(topics[1]);
                     if (device) {
-                        if (device) {
-                            device.emit(eventParams.action ?? 'status_changed', eventParams);
-                        }
+                        device.emit(eventParams.action ?? 'status_changed', eventParams);
                     }
             }
         });
@@ -79,11 +94,12 @@ class MqttExtension extends Extension {
 
         // Gracefully close the MQTT connection on process exit
         process.on('SIGINT', () => {
-            logger.debug('Closing MQTT connection');
-            this.client.end(() => logger.debug('Closed MQTT connection'));
+            if (this.client !== null) {
+                logger.debug('Closing MQTT connection');
+                this.client.end(() => logger.debug('Closed MQTT connection'));
+            }
         });
     }
 }
 
 export default new MqttExtension();
-// export const mqttClient = extension.client;
