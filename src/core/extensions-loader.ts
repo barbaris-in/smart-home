@@ -8,7 +8,6 @@ class ExtensionsLoader {
     private extensions: Extension[] = [];
 
     loadExtensions() {
-        // todo: order extensions by priority
         const normalizedPath: string = path.join(__dirname, '../extensions');
         logger.debug('Loading extensions...', normalizedPath);
         fs.readdirSync(normalizedPath).forEach((extensionName: string): void => {
@@ -20,6 +19,13 @@ class ExtensionsLoader {
            }
            logger.debug('Extension has been loaded:', {extensionName});
            this.extensions.push(extension.default);
+        });
+        this.orderExtensions();
+    }
+
+    protected orderExtensions(): void {
+        this.extensions = this.extensions.sort((a: Extension, b: Extension): number => {
+            return a.dependsOn().indexOf(b.getName()) > -1 ? 1 : -1
         });
     }
 
