@@ -6,3 +6,4 @@
         volumes:
             - ./smart-home-data/logs:/app/logs
             - ./smart-home-data/config:/app/config
+            - ./smart-home-data/data:/app/data

@@ -47,11 +47,11 @@ class DeviceManager {
     }
 
     saveDevices(): void {
-        if (!fs.existsSync('config/cache')) {
-            fs.mkdirSync('config/cache');
+        if (!fs.existsSync('data')) {
+            fs.mkdirSync('data');
         }
         // todo: add comment to file not to edit it manually
-        fs.writeFile('config/cache/devices.yaml', yaml.dump(this.devicesById), (err) => {
+        fs.writeFile('data/devices.yaml', yaml.dump(this.devicesById), (err) => {
             if (err) {
                 logger.error('Error saving devices cache file', err);
             }
@@ -59,14 +59,14 @@ class DeviceManager {
     }
 
     loadDevices(): void {
-        const fileExists: boolean = fs.existsSync('config/cache/devices.yaml');
+        const fileExists: boolean = fs.existsSync('data/devices.yaml');
         if (!fileExists) {
             logger.warn('Devices cache file does not exist. Skipping loading devices.');
             return;
         }
 
         logger.debug('Loading devices from cache file');
-        const data: string = fs.readFileSync('config/cache/devices.yaml', 'utf8');
+        const data: string = fs.readFileSync('data/devices.yaml', 'utf8');
         const parsedData: any = yaml.load(data);
         for (const deviceId in parsedData) {
             const deviceName: string = parsedData[deviceId].device.name;
