@@ -44,3 +44,33 @@ Example:
 ```
 
 Following is the list of all supported methods and parameters.
+
+### TODO: Method `get_prop` 
+
+This method is used to retrieve current property of smart LED.
+
+Parameters: 1 to N
+The parameter is a list of property names and the response contains a list of corresponding property values. If the requested property name is not recognized by smart LED, then a empty string value ("") will be returned.
+Request example:
+```json
+{ "id":1, "method":"get_prop", "params":["power", "not_exist", "bright"]}
+```
+Response example:
+```json
+{ "id":1, "result":["on", "", "100"]}
+```
+TODO: Note: All the supported properties are defined in table 4-2, section 4.3
+
+### Method `set_ct_abx`
+
+This method is used to change the color temperature of a smart LED.
+
+Parameters: 3
+  - `ct_value` is the target color temperature. The type is integer and range is 1700 ~ 6500 (k).
+  - `effect` supports two values: "sudden" and "smooth". If effect is "sudden", then the color temperature will be changed directly to target value, under this case, the third parameter "duration" is ignored. If effect is "smooth", then the color temperature will be changed to target value in a gradual fashion, under this case, the total time of gradual change is specified in third parameter "duration".
+  - `duration` specifies the total time of the gradual changing. The unit is milliseconds. The minimum support duration is 30 milliseconds.
+
+Request example:
+```json
+{ "id":1, "method":"set_ct_abx", "params":[3500, "smooth", 50]}
+```

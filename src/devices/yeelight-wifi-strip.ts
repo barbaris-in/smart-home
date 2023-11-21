@@ -67,4 +67,16 @@ export default class YeelightWifiStrip extends GenericDevice {
         }, timeout * 1000);
         timers.refreshTimer(this.getName(), timer);
     }
+
+    public setTemperature(temperature: number): boolean {
+        if (temperature < 1700) {
+            temperature = 1700;
+            logger.warn('Temperature is too low, setting to 1700');
+        }
+        if (temperature > 6500) {
+            temperature = 6500;
+            logger.warn('Temperature is too high, setting to 6500');
+        }
+        return this.sendCommand({"id": 1, "method": "set_ct_abx", "params": [temperature, "smooth", 500]});
+    }
 }
