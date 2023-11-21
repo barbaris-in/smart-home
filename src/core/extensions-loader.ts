@@ -20,10 +20,6 @@ class ExtensionsLoader {
            logger.debug('Extension has been loaded:', {extensionName});
            this.extensions.push(extension.default);
         });
-        this.orderExtensions();
-    }
-
-    protected orderExtensions(): void {
         this.extensions = this.extensions.sort((a: Extension, b: Extension): number => {
             return a.dependsOn().indexOf(b.getName()) > -1 ? 1 : -1
         });
