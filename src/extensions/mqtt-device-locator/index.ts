@@ -2,6 +2,7 @@ import Extension from "../../core/abstract-extension";
 import deviceManager from "../../core/device-manager";
 import DeviceClassDecider from "../../core/device-class-decider";
 import deviceClassRegistry from "../../core/device-class-registry";
+import GenericDevice from "../../devices/generic-device";
 
 const logger = require("../../core/logger").logger('mqtt-device-discovery');
 
@@ -28,8 +29,13 @@ class MqttDeviceLocator extends Extension {
                     if (!deviceManager.hasDevice(mqttDevice.ieee_address)) {
                         const classFile: string = DeviceClassDecider.getDeviceClass(mqttDevice);
                         const deviceClass = deviceClassRegistry.get(classFile);
-                        const device = new deviceClass(mqttDevice.ieee_address, mqttDevice.friendly_name, mqttDevice);
-                        deviceManager.addDevice(device, 'mqtt');
+                        const newDevice = new deviceClass(mqttDevice.ieee_address, mqttDevice.friendly_name, mqttDevice);
+                        deviceManager.addDevice(newDevice, 'mqtt');
+                    } else {
+                        const device = deviceManager.getDevice(mqttDevice.ieee_address);
+                        if (device instanceof GenericDevice) {
+                            device.updateState(mqttDevice);
+                        }
                     }
                 }
             }

@@ -2,16 +2,14 @@ import Extension from "../../core/abstract-extension";
 import * as dgram from "dgram";
 import deviceManager from "../../core/device-manager";
 import YeelightWifiStrip from "../../devices/yeelight-wifi-strip";
-const logger = require('../../core/logger').logger('1982-udp-discovery');
+const logger = require('../../core/logger').logger('yeelight-device-locator');
 
 class YeelightDeviceLocator extends Extension {
     getName(): string {
-        return "1982-udp-discovery";
+        return "yeelight-device-locator";
     }
 
     run(): void {
-        logger.debug("Running 1982-udp-discovery");
-
         // Multicast address and port
         const multicastAddress = '239.255.255.250';
         const multicastPort = 1982;
