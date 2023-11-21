@@ -26,7 +26,7 @@ class YeelightDeviceLocator extends Extension {
                     logger.debug('Advertising', {rinfo, msg: msg.toString()});
                     const {id, name, ip, port, model} = YeelightDeviceLocator.parseNotifyMessage(msg.toString());
 
-                    deviceManager.addDevice(new YeelightWifiStrip(id, name ? name : id, ip, port), 'yeelight');
+                    deviceManager.addDevice(new YeelightWifiStrip(id, name ? name : id, {ip, port}), 'yeelight');
                     deviceManager.saveDevices();
                     break;
                 case 'M-SEARCH':
