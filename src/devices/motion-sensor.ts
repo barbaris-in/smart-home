@@ -6,8 +6,8 @@ export default class MotionSensor extends GenericMqttDevice {
     // todo: what default value should be here? possibly null? better to initialize it in constructor from cached value
     private occupancy: boolean | null = null;
 
-    constructor(protected readonly id: string, protected name: string, protected object: any) {
-        super(id, name, object);
+    constructor(protected readonly id: string, protected name: string) {
+        super(id, name);
 
         this.on('status_changed', (params: any) => {
             if (undefined === params.occupancy) {

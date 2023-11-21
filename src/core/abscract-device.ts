@@ -3,8 +3,9 @@ import actions from './actions';
 export default abstract class Device {
     public readonly type: string = 'abstract-device';
 
-    constructor(protected readonly id: string, protected name: string, protected object: any = {}) {
+    constructor(protected readonly id: string, protected name: string) {
     }
+
     getId(): string {
         return this.id;
     }
