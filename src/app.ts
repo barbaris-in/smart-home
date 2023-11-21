@@ -16,4 +16,4 @@ extensionsLoader.registerDeviceClasses();
 
 deviceManager.loadDevices();
 
-extensionsLoader.runExtensions();
+extensionsLoader.initExtensions();

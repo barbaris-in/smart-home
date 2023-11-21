@@ -32,10 +32,10 @@ class ExtensionsLoader {
         }
     }
 
-    runExtensions(): void {
+    initExtensions(): void {
         for(const extension of this.extensions) {
             logger.debug("Running extension:", {name: extension.getName()});
-            extension.run();
+            extension.init();
         }
     }
 }

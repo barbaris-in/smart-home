@@ -34,7 +34,7 @@ class InternetAccessExtension extends Extension {
         return "internet-access";
     }
 
-    run(): void {
+    init(): void {
         const internetDevice = new InternetDevice('internet', 'Internet');
         deviceManager.addDevice(internetDevice, 'internet');
         const ping = require('ping');

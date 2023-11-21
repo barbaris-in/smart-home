@@ -9,7 +9,7 @@ class YeelightDeviceLocator extends Extension {
         return "yeelight-device-locator";
     }
 
-    run(): void {
+    init(): void {
         // Multicast address and port
         const multicastAddress = '239.255.255.250';
         const multicastPort = 1982;

@@ -15,7 +15,7 @@ class MqttDeviceLocator extends Extension {
         return ['mqtt'];
     }
 
-    run(): void {
+    init(): void {
         const mqttDevice = deviceManager.getDeviceByName('MQTT');
         if (!mqttDevice) {
             logger.error('MQTT device not found');

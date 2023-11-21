@@ -30,7 +30,7 @@ class MqttExtension extends Extension {
         deviceClassRegistry.register('mqtt-device', MqttDevice);
     }
 
-    run(): void {
+    init(): void {
         const device = new MqttDevice('mqtt', 'MQTT');
         deviceManager.addDevice(device, 'mqtt');
         const brokerAddress: string = `mqtt://${mqttHost}:${mqttPort}`;

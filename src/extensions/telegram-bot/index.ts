@@ -16,7 +16,7 @@ class TelegramBot extends Extension {
         return 'telegram-bot';
     }
 
-    run(): void {
+    init(): void {
         this.bot.start((ctx) => {
             ctx.reply('Welcome!');
             console.log(ctx.update.message.chat.id);

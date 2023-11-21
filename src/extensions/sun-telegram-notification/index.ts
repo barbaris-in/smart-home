@@ -13,7 +13,7 @@ class Index extends Extension {
         return ['sun', 'telegram-bot'];
     }
 
-    run(): void {
+    init(): void {
         const chatId: number = parseFloat(process.env.TELEGRAM_CHAT_ID || '');
         const sun = deviceManager.getDeviceByName('Sun');
         if (!(sun instanceof SunDevice)) {

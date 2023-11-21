@@ -22,7 +22,7 @@ class SunExtension extends Extension {
         deviceClassRegistry.register('sun', SunDevice);
     }
 
-    run(): void {
+    init(): void {
         logger.debug("Running sun");
         deviceManager.addDevice(new SunDevice('sun', 'Sun'), 'sun');
         this.setupSunEvent();

@@ -10,7 +10,7 @@ class CubeAutomation extends Extension {
         return "cube-automation";
     }
 
-    run(): void {
+    init(): void {
         const cube: Device | null = deviceManager.getDeviceByName('Cube');
         if (!cube) {
             logger.error('Cube not found');

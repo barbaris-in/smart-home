@@ -11,7 +11,7 @@ class WebAPI extends Extension {
         return 'web-api';
     }
 
-    run(): void {
+    init(): void {
         const api: Express = express();
 
         const port: number = this.port;

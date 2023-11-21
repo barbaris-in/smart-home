@@ -9,7 +9,7 @@ class AutomationExtension extends Extension {
         return "motion-light-automation";
     }
 
-    run(): void {
+    init(): void {
         logger.debug("Running automation1");
         const automate = function(motionDeviceName: string, lightDeviceName: string, timeout: number = 0) {
             const motionSensor = deviceManager.getDeviceByName(motionDeviceName);
