@@ -1,4 +1,6 @@
 deploy:
+	rm -fr dist
+	tsc
 	ssh pi@raspberrypi rm -fr /tmp/smart-home
 	ssh pi@raspberrypi mkdir /tmp/smart-home
 	scp .env pi@raspberrypi:/tmp/smart-home
@@ -21,4 +23,3 @@ build:
 	cp index.js /tmp/smart-home
 	cp -r dist /tmp/smart-home
 	docker build -t barbaris/smart-home:alpha-1 /tmp/smart-home
-
