@@ -25,7 +25,6 @@ class MqttDeviceLocator extends Extension {
             for (const mqttDevice of mqttDevices) {
                 logger.debug('Registering device', mqttDevice);
                 if (mqttDevice.definition && mqttDevice.definition.description) {
-                    console.log(mqttDevice.definition);
                     if (!deviceManager.hasDevice(mqttDevice.ieee_address)) {
                         const classFile: string = DeviceClassDecider.getDeviceClass(mqttDevice);
                         const deviceClass = deviceClassRegistry.get(classFile);
