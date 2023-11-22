@@ -49,6 +49,14 @@ export default class Bulb extends GenericDevice {
         });
     }
 
+    public getBrightness(): number | null {
+        return this.brightness;
+    }
+
+    public getColorTemperature(): number | null {
+        return this.color_temp;
+    }
+
     public turnOn(): void {
         this.sendCommand({state: 'ON'});
         timers.clearTimer(this.getName());
@@ -77,7 +85,8 @@ export default class Bulb extends GenericDevice {
      * @param brightness
      */
     public setBrightness(brightness: number): void {
-        this.sendCommand({brightness: brightness});
+        this.brightness = Math.max(0, Math.min(254, brightness));
+        this.sendCommand({brightness: this.brightness});
     }
 
     /**
@@ -86,7 +95,8 @@ export default class Bulb extends GenericDevice {
      * @param colorTemperature
      */
     public setColorTemperature(colorTemperature: number): void {
-        this.sendCommand({color_temp: colorTemperature});
+        this.color_temp = Math.max(153, Math.min(370, colorTemperature))
+        this.sendCommand({color_temp: this.color_temp});
     }
 
     protected sendCommand(command: {}): void {
