@@ -20,11 +20,11 @@ export default class Cube extends GenericMqttDevice {
     }
 
     public onFlip90(callback: Function): void {
-        this.on('filp90', callback);
+        this.on('flip90', callback);
     }
 
     public onFlip180(callback: Function): void {
-        this.on('filp180', callback);
+        this.on('flip180', callback);
     }
 
     public onShake(callback: Function): void {
