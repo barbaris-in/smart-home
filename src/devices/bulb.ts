@@ -1,7 +1,8 @@
 import GenericDevice from "./generic-device";
 import timers from "../core/timers";
+import GenericMqttDevice from "./generic-mqtt-device";
 
-export default class Bulb extends GenericDevice {
+export default class Bulb extends GenericMqttDevice {
     public readonly type: string = 'bulb';
     protected state: string | null = null;
     protected brightness: number | null = null;
@@ -97,12 +98,5 @@ export default class Bulb extends GenericDevice {
     public setColorTemperature(colorTemperature: number): void {
         this.color_temp = Math.max(153, Math.min(370, colorTemperature))
         this.sendCommand({color_temp: this.color_temp});
-    }
-
-    protected sendCommand(command: {}): void {
-        const commandString = JSON.stringify(command);
-        const mqtt = require("../extensions/mqtt").default;
-        mqtt.client.publish(`zigbee2mqtt/${this.name}/set`, commandString);
-        timers.clearTimer(this.getName());
     }
 }
