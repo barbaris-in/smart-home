@@ -26,7 +26,6 @@ class CubeAutomation extends Extension {
             let brightnessMode = true;
 
             const rotationCallback = (params: any) => {
-                console.log('=======================================================================================', 'brightnessMode', brightnessMode);
                 if (!params.angle) {
                     logger.error('No angle', params);
                     return;
@@ -43,7 +42,7 @@ class CubeAutomation extends Extension {
             cube.onRotateLeft(rotationCallback);
             cube.onFlip90(() => {
                 brightnessMode = !brightnessMode;
-                console.log('=======================================================================================', 'brightnessMode', brightnessMode);
+                logger.debug('Switched to', {brightnessMode});
             })
         }
     }
