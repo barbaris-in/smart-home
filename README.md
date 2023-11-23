@@ -61,6 +61,17 @@ LOG_LEVEL=debug
 
 ## Run 
 
+If you installed with npm just run `npm run start` in root directory of project.
+
+```bash
+  npm run start
+```
+
+If you installed with docker just run `docker-compose up -d` in root directory of project.
+
+```bash
+  docker-compose up -d
+```
 
 ## Make your own extension
 
