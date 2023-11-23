@@ -18,6 +18,8 @@ export default class DeviceClassDecider {
             case 'Aqara human body movement and illuminance sensor':
             case 'MiJia human body movement sensor':
                 return 'motion-sensor';
+            case 'Mi power plug ZigBee':
+                return 'plug';
             default:
                 return 'generic-mqtt-device';
         }
