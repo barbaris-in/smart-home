@@ -1,4 +1,3 @@
-import GenericDevice from "./generic-device";
 import timers from "../core/timers";
 import GenericMqttDevice from "./generic-mqtt-device";
 
@@ -50,8 +49,24 @@ export default class Bulb extends GenericMqttDevice {
         });
     }
 
+    public isTurnedOn(): boolean {
+        return this.state === 'ON';
+    }
+
+    public getState(): string | null {
+        return this.state;
+    }
+
+    /**
+     * value_max: 254
+     * value_min: 0
+     */
     public getBrightness(): number | null {
         return this.brightness;
+    }
+
+    public getBrightnessPercentage(): number {
+        return Math.round((this.getBrightness() || 128) / 254 * 100);
     }
 
     public getColorTemperature(): number | null {
@@ -59,11 +74,13 @@ export default class Bulb extends GenericMqttDevice {
     }
 
     public turnOn(): void {
+        this.state = 'ON';
         this.sendCommand({state: 'ON'});
         timers.clearTimer(this.getName());
     }
 
     public turnOff(): void {
+        this.state = 'OFF';
         this.sendCommand({state: 'OFF'});
         timers.clearTimer(this.getName());
     }
@@ -90,13 +107,24 @@ export default class Bulb extends GenericMqttDevice {
         this.sendCommand({brightness: this.brightness});
     }
 
+    public setBrightnessPercentage(brightness: number): void {
+        this.setBrightness(Math.round(brightness / 100 * 254));
+    }
+
     /**
-     * value_max: 370
-     * value_min: 153
+     * value_max: 370 2700K
+     * value_min: 153 4000K
      * @param colorTemperature
      */
     public setColorTemperature(colorTemperature: number): void {
         this.color_temp = Math.max(153, Math.min(370, colorTemperature))
         this.sendCommand({color_temp: this.color_temp});
+    }
+
+    public setColorTemperatureKelvin(colorTemperature: number): void {
+        const newTemperatureKelvin: number = Math.max(2700, Math.min(4000, colorTemperature));
+        const percentage: number = (newTemperatureKelvin - 2700) / (4000 - 2700);
+        const newColorTemperature: number = Math.round((1 - percentage) * (370 - 153) + 153);
+        this.setColorTemperature(Math.round(newColorTemperature));
     }
 }
