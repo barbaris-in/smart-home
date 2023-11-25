@@ -1,5 +1,5 @@
 import Extension from "../../core/abstract-extension";
-const logger = require("../../core/logger").logger('motion-light-automation');
+const logger = require("../../core/logger").logger('kalyna');
 import deviceManager from "../../core/device-manager";
 import Bulb from "../../devices/bulb";
 import MotionSensor from "../../devices/motion-sensor";
