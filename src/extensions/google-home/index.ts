@@ -1,11 +1,11 @@
 import Extension from "../../core/abstract-extension";
 import * as express from "express";
 import * as bodyParser from "body-parser";
-import axios from 'axios';
-import AuthorizationError from "./authorization-error";
 import Sync from "./sync";
 import Query from "./query";
 import Execute from "./execute";
+import Security from "../../core/security";
+import AuthorizationError from "../../core/authorization-error";
 
 const logger = require("../../core/logger").logger('google-home');
 
@@ -14,55 +14,13 @@ class GoogleHomeApi extends Extension {
         return "google-home";
     }
 
-    /**
-     * @param req
-     * {
-     *     "message": "Token validation successful",
-     *     "user": {
-     *         "username": "barbaris",
-     *         "iat": 1701247726,
-     *         "exp": 1701334126
-     *     }
-     * }
-     */
-    validateToken(req: any): Promise<any> {
-        return new Promise((resolve, reject) => {
-            const authHeader = req.headers.authorization;
-            if (!authHeader) {
-                logger.error('No auth header', {headers: req.headers});
-                reject(new AuthorizationError('Authentication failed', 401));
-                return;
-            }
-            const token = authHeader.split(' ')[1];
-            if (!token) {
-                logger.error('No token', {headers: req.headers});
-                reject(new AuthorizationError('Authentication failed', 401));
-                return;
-            }
-            axios.get('https://auth.barbaris.in/validate?access_token=' + token)
-                .then((res) => {
-                    const user = res.data.user;
-                    const allowedUsers = ['barbaris'];
-                    if (allowedUsers.indexOf(user.username) !== -1) {
-                        resolve(user);
-                    } else {
-                        reject(new AuthorizationError('User not allowed', 403));
-                    }
-                })
-                .catch((err) => {
-                    logger.error('Error. Authentication failed', {err});
-                    reject(new AuthorizationError('Authentication failed', 401));
-                });
-        });
-    }
-
     init(): void {
         const app = express();
         app.use(bodyParser.json());
 
         app.post('/fulfillment', (req, res) => {
-            logger.debug('=======================   fulfillment   =======================', {body: req.body});
-            this.validateToken(req)
+            logger.debug('Fulfillment', {body: req.body});
+            Security.authorize(req)
                 .then(user => {
                     try {
                         const input = req.body.inputs[0];
