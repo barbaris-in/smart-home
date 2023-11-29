@@ -3,7 +3,7 @@ deploy:
 	tsc
 	ssh pi@raspberrypi rm -fr /tmp/smart-home
 	ssh pi@raspberrypi mkdir /tmp/smart-home
-	scp .env pi@raspberrypi:/tmp/smart-home
+	scp .env pi@raspberrypi:/home/pi/smart-home
 	scp package.json pi@raspberrypi:/tmp/smart-home
 	scp package-lock.json pi@raspberrypi:/tmp/smart-home
 	scp Dockerfile pi@raspberrypi:/tmp/smart-home
