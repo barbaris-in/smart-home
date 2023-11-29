@@ -24,7 +24,7 @@ class TelegramBot extends Extension {
 
         this.bot.launch()
             .then(() => {
-                logger.debug('Telegram bot has been started');
+                logger.info('Telegram bot has been started');
 
                 process.once('SIGINT', () => {
                     this.bot.stop('SIGINT');
