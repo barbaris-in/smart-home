@@ -127,4 +127,9 @@ export default class Bulb extends GenericMqttDevice {
         const newColorTemperature: number = Math.round((1 - percentage) * (370 - 153) + 153);
         this.setColorTemperature(Math.round(newColorTemperature));
     }
+
+    public getColorTemperatureKelvin(): number {
+        const percentage: number = ((this.color_temp || 180) - 153) / (370 - 153);
+        return Math.round(percentage * (4000 - 2700) + 2700);
+    }
 }
