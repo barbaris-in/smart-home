@@ -4,13 +4,12 @@ RUN mkdir /app
 
 WORKDIR /app
 
-COPY package-lock.json /app
+ENTRYPOINT ["npm", "run", "start"]
+EXPOSE 3000
+
 COPY package.json /app
+COPY package-lock.json /app
 COPY index.js /app
 COPY dist /app/dist
 
 RUN npm install --omit=dev
-
-ENTRYPOINT ["npm", "run", "start"]
-
-EXPOSE 3000
