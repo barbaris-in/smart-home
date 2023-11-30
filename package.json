@@ -1,9 +1,10 @@
 {
   "name": "smart-home",
-  "version": "0.0.1",
+  "version": "0.0.10",
   "description": "Barbaris Smart Home",
   "main": "index.js",
   "scripts": {
+    "compile": "./node_modules/typescript/bin/tsc",
     "start": "node index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
