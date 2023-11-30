@@ -1,4 +1,4 @@
-import axios from "axios/index";
+import axios from "axios";
 import AuthorizationError from "./authorization-error";
 
 const logger = require("./logger").logger('security');
