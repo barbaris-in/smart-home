@@ -1,31 +1,31 @@
-import Device from "../../core/abscract-device";
+import {Device} from "../../core/abscract-device";
 import deviceManager from "../../core/device-manager";
-import Bulb from "../../devices/bulb";
+import {OnOff} from "../../core/traits/OnOff";
+import {Brightness} from "../../core/traits/Brightness";
+import {ColorTemperature} from "../../core/traits/ColorTemperature";
 
 const logger = require('../../core/logger').logger('google-home-query');
 
 export default class Query {
     static query(requestId: string, intent: any): any {
-        const responseDevices = {};
+        const responseDevices: { [key: string]: any } = {};
 
         for (const requestDevice of intent.payload.devices) {
             const deviceId = requestDevice.id;
             const device: Device = deviceManager.getDevice(deviceId);
 
-            switch (true) {
-                case device instanceof Bulb:
-                    // @ts-ignore
-                    responseDevices[deviceId] = {
-                        on: (device as Bulb).isTurnedOn(),
-                        online: true,
-                        brightness: (device as Bulb).getBrightnessPercentage(),
-                        color: {
-                            temperatureK: (device as Bulb).getColorTemperatureKelvin(),
-                        },
-                    }
-                    break;
-                default:
+            const responseDevice: any = {};
+            if (device.supports(OnOff)) {
+                responseDevice.on = OnOff(device).getOnOff();
             }
+            if (device.supports(Brightness)) {
+                responseDevice.brightness = Brightness(device).getBrightnessPercentage();
+            }
+            if (device.supports(ColorTemperature)) {
+                responseDevice.color.temperatureK = ColorTemperature(device).getColorTemperatureKelvin();
+            }
+            responseDevice.online = true; // todo: check if device is online
+            responseDevices[deviceId] = responseDevice;
         }
         return {
             requestId: requestId,

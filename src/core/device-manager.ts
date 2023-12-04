@@ -1,7 +1,6 @@
-import Device from "./abscract-device";
 import * as yaml from 'js-yaml';
 import * as fs from 'fs';
-import deviceClassRegistry from "./device-class-registry";
+import {Device} from "./abscract-device";
 
 const logger = require("./logger").logger('devices');
 
@@ -14,19 +13,18 @@ class HomeDevice {
     }
 }
 
-class DeviceManager {
+export class DeviceManager {
     protected devicesById: ListOfDevices = {};
     protected devicesByName: ListOfDevices = {};
 
     addDevice(device: Device, source: string): void {
-        const deviceId: string = device.getId();
-        if (this.hasDevice(deviceId)) {
+        if (this.hasDevice(device.id)) {
             // todo: updated device.
             // todo: optionally check if device changed
         } else {
             const homeDevice: HomeDevice = new HomeDevice(source, device);
-            this.devicesById[device.getId()] = homeDevice;
-            this.devicesByName[device.getName()] = homeDevice;
+            this.devicesById[device.id] = homeDevice;
+            this.devicesByName[device.name] = homeDevice;
         }
     }
 
@@ -46,37 +44,51 @@ class DeviceManager {
         return this.devicesById;
     }
 
-    saveDevices(): void {
+    saveDevices(source: string): void {
         if (!fs.existsSync('data')) {
             fs.mkdirSync('data');
         }
         // todo: add comment to file not to edit it manually
-        fs.writeFile('data/devices.yaml', yaml.dump(this.devicesById), (err) => {
+        fs.writeFile(`data/${source}.yaml`, yaml.dump(YamlFileLoader.encode(source, this.devicesById)), (err) => {
             if (err) {
                 logger.error('Error saving devices cache file', err);
             }
         });
     }
 
-    loadDevices(): void {
-        const fileExists: boolean = fs.existsSync('data/devices.yaml');
+    loadDevices(source: string): any {
+        const fileName = `data/${source}.yaml`;
+        const fileExists: boolean = fs.existsSync(fileName);
         if (!fileExists) {
-            logger.warn('Devices cache file does not exist. Skipping loading devices.');
+            logger.warn('Devices cache file does not exist. Skipping loading devices.', {fileName});
             return;
         }
 
-        logger.debug('Loading devices from cache file');
-        const data: string = fs.readFileSync('data/devices.yaml', 'utf8');
-        const parsedData: any = yaml.load(data);
-        for (const deviceId in parsedData) {
-            const deviceName: string = parsedData[deviceId].device.name;
-            const deviceClass = deviceClassRegistry.get(parsedData[deviceId].device.type);
-            const device: Device = new deviceClass(deviceId, deviceName, parsedData[deviceId].device);
-            const homeDevice: HomeDevice = new HomeDevice(parsedData[deviceId].source, device);
-            this.devicesById[deviceId] = homeDevice;
-            this.devicesByName[deviceName] = homeDevice;
-        }
+        logger.debug('Loading devices from cache file', {fileName});
+        const data: string = fs.readFileSync(fileName, 'utf8');
+        return yaml.load(data);
     }
 }
 
 export default new DeviceManager();
+
+export class YamlFileLoader {
+    static encode(source: string, homeDevices: any): {} {
+        const result: { [key: string]: {}; } = {};
+        for (const homeDeviceId in homeDevices) {
+            if (homeDevices[homeDeviceId].source !== source) continue;
+            const homeDevice = homeDevices[homeDeviceId];
+            // const traits: string[] = [];
+            // for (const traitName in homeDevice.device.traits) {
+            //     const trait = homeDevice.device.traits[traitName];
+            //     traits.push(traitName);
+            // }
+            result[homeDeviceId] = {
+                name: homeDevice.device.name,
+                info: homeDevice.device.getInfo(),
+            };
+        }
+
+        return result;
+    }
+}

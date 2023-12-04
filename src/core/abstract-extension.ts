@@ -1,12 +1,12 @@
-import {DeviceClassRegistry} from "./device-class-registry";
+import deviceManager from "./device-manager";
 
 export default abstract class Extension {
     abstract getName(): string;
 
-    abstract init(): void;
-
-    public registerDeviceClasses(deviceClassRegistry: DeviceClassRegistry): void {
+    loadDevices(): void {
     }
+
+    abstract init(): void;
 
     public dependsOn(): string[] {
         return [];

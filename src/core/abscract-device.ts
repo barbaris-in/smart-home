@@ -1,26 +1,46 @@
 import actions from './actions';
 
-export default abstract class Device {
-    public readonly type: string = 'abstract-device';
+export abstract class Trait {
+}
 
-    constructor(protected readonly id: string, protected name: string, params: any = {}) {
+export class Device {
+    protected info: any;
+    public readonly properties: { [key: string]: boolean | number | string } = {}
+
+    constructor(public readonly id: string, public name: string, public readonly traits: { [key: string]: Trait } = {}) {
     }
 
-    getId(): string {
-        return this.id;
+    public supports(traitFunction: Function): boolean {
+        return this.traits[traitFunction.name] && true;
     }
 
-    getName(): string {
-        return this.name;
+    setProperty(name: string, newValue: boolean | number | string): void {
+        if (!this.properties[name]) {
+            // todo: new property
+        } else {
+            const oldValue = this.properties[name];
+            if (oldValue !== newValue) {
+                this.emit('property_changed', {name, oldValue, newValue});
+            }
+        }
+        this.properties[name] = newValue;
     }
 
     emit(event: string, args: any = {}): void {
-        actions.getCallbacks(this.getName(), event).forEach((callback: Function): void => {
+        actions.getCallbacks(this.name, event).forEach((callback: Function): void => {
             callback(args);
         });
     }
 
     on(event: string, callback: Function): void {
-        actions.addCallback(this.getName(), event, callback);
+        actions.addCallback(this.name, event, callback);
+    }
+
+    public setInfo(info: any): void {
+        this.info = info;
+    }
+
+    public getInfo(): any {
+        return this.info;
     }
 }

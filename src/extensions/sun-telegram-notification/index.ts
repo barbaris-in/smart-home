@@ -2,6 +2,7 @@ import Extension from "../../core/abstract-extension";
 import telegramBot from "../telegram-bot/index";
 import deviceManager from "../../core/device-manager";
 import {SunDevice} from "../sun";
+
 const logger = require('../../core/logger').logger('sun-telegram-notification');
 
 class Index extends Extension {

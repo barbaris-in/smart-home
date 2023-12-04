@@ -1,6 +1,6 @@
 {
   "name": "smart-home",
-  "version": "0.0.10",
+  "version": "0.2.0",
   "description": "Barbaris Smart Home",
   "main": "index.js",
   "scripts": {
@@ -19,6 +19,7 @@
     "mqtt": "^5.2.2",
     "node-schedule": "^2.1.1",
     "ping": "^0.4.4",
+    "sqlite3": "^5.1.6",
     "sunrise-sunset-js": "^2.2.1",
     "telegraf": "^4.15.0",
     "winston": "^3.11.0"

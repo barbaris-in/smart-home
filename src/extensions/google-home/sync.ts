@@ -1,6 +1,9 @@
 import deviceManager from "../../core/device-manager";
-import Device from "../../core/abscract-device";
-import Bulb from "../../devices/bulb";
+import {Device} from "../../core/abscract-device";
+import GoogleDeviceType from "./GoogleDeviceType";
+import {OnOff} from "../../core/traits/OnOff";
+import {Brightness} from "../../core/traits/Brightness";
+import {ColorTemperature} from "../../core/traits/ColorTemperature";
 
 const logger = require('../../core/logger').logger('google-home-sync');
 
@@ -10,49 +13,51 @@ export default class Sync {
         const devices = deviceManager.getDevices();
         for (const deviceId in devices) {
             const device: Device = devices[deviceId].device;
-            switch (true) {
-                case device instanceof Bulb:
-                    responseDevices.push({
-                        id: deviceId,
-                        type: 'action.devices.types.LIGHT',
-                        traits: [
-                            'action.devices.traits.OnOff',
-                            'action.devices.traits.ColorSetting',
-                            'action.devices.traits.Brightness',
-                        ],
-                        name: {
-                            defaultNames: [device.getName()],
-                            name: device.getName(),
-                            nicknames: [device.getName()],
-                        },
-                        deviceInfo: {
-                            manufacturer: 'Acme Co',
-                            model: 'acme-washer',
-                            hwVersion: '1.0',
-                            swVersion: '1.0.1',
-                        },
-                        willReportState: true,
-                        attributes: {
-                            // todo: is the light color temperature adjustable?
-                            colorTemperatureRange: {
-                                // todo: get max and min color temperature from device
-                                "temperatureMinK": 2000,
-                                "temperatureMaxK": 9000
-                            },
-                        },
-                    });
-                    break;
-                default:
-                    logger.warn('Unsupported device type', {device: device});
+            const deviceType: string = GoogleDeviceType.getDeviceType(device);
+            if (deviceType === 'unknown') continue;
+            const traits: string[] = [];
+            const attributes: any = {};
+            if (device.supports(OnOff)) {
+                traits.push('action.devices.traits.OnOff');
             }
+            if (device.supports(Brightness)) {
+                traits.push('action.devices.traits.Brightness');
+            }
+            if (device.supports(ColorTemperature)) {
+                traits.push('action.devices.traits.ColorSetting');
+                // todo: is the light color temperature adjustable?
+                attributes.colorTemperatureRange = {
+                    "temperatureMinK": ColorTemperature(device).minColorTemperatureKelvin,
+                    "temperatureMaxK": ColorTemperature(device).maxColorTemperatureKelvin,
+                }
+            }
+            responseDevices.push({
+                id: deviceId,
+                type: deviceType,
+                traits: traits,
+                name: {
+                    defaultNames: [device.name],
+                    name: device.name,
+                    nicknames: [device.name],
+                },
+                deviceInfo: {
+                    manufacturer: 'Acme Co', // todo: get manufacturer
+                    model: 'acme-washer', // todo: get model
+                    hwVersion: '1.0', // todo: get hardware version
+                    swVersion: '1.0.1', // todo: get software version
+                },
+                willReportState: true,
+                attributes: attributes,
+            });
         }
-        // logger.info('Synchronizing', {devices: responseDevices});
+
+        logger.info('Synchronizing', {devices: responseDevices});
         return {
             requestId: requestId,
             payload: {
                 agentUserId: userId,
                 devices: responseDevices,
-            },
+            }
         }
     }
 }

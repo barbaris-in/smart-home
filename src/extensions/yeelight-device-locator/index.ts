@@ -1,12 +1,48 @@
 import Extension from "../../core/abstract-extension";
 import * as dgram from "dgram";
+import {Device} from "../../core/abscract-device";
+import {OnOffTrait} from "../../core/traits/OnOff";
 import deviceManager from "../../core/device-manager";
-import YeelightWifiStrip from "../../devices/yeelight-wifi-strip";
+
 const logger = require('../../core/logger').logger('yeelight-device-locator');
+import * as net from 'net';
+
 
 class YeelightDeviceLocator extends Extension {
     getName(): string {
         return "yeelight-device-locator";
+    }
+
+    loadDevices() {
+        super.loadDevices();
+        const data = deviceManager.loadDevices('yeelight');
+        for (const deviceId in data) {
+            const device: Device = YeelightDeviceLocator.deviceFromInfo(data[deviceId].info);
+            deviceManager.addDevice(device, 'yeelight');
+        }
+    }
+
+    protected static deviceFromInfo(info: string): Device {
+        const {id, name, ip, port, model} = YeelightDeviceLocator.parseNotifyMessage(info);
+
+        const device = new Device(id, name, {
+            'OnOff': new OnOffTrait((state: boolean) => {
+                const client = new net.Socket();
+                if (!ip || !port) {
+                    logger.error('No IP or port', this);
+                    return false;
+                }
+
+                client.connect(port, ip, () => {
+                    const commandString = JSON.stringify({"id": 1, "method": "set_power", "params": [state ? "on" : "off", "smooth", 500]}) + '\r\n';
+                    client.write(commandString);
+                    client.destroy();
+                });
+                return true;
+            })
+        });
+        device.setInfo(info);
+        return device;
     }
 
     init(): void {
@@ -20,20 +56,19 @@ class YeelightDeviceLocator extends Extension {
         // Set up an event listener for incoming messages
         server.on('message', (msg, rinfo) => {
             // logger.debug('Received multicast message', {rinfo, msg: msg.toString()});
-            const messageType = YeelightDeviceLocator.parseMessageType(msg.toString());
+            const notifyMessage: string = msg.toString();
+            const messageType = YeelightDeviceLocator.parseMessageType(notifyMessage);
             switch (messageType) {
                 case 'NOTIFY':
-                    logger.debug('Advertising', {rinfo, msg: msg.toString()});
-                    const {id, name, ip, port, model} = YeelightDeviceLocator.parseNotifyMessage(msg.toString());
-
-                    deviceManager.addDevice(new YeelightWifiStrip(id, name ? name : id, {ip, port}), 'yeelight');
-                    deviceManager.saveDevices();
+                    logger.debug('Advertising', {rinfo, msg: notifyMessage});
+                    deviceManager.addDevice(YeelightDeviceLocator.deviceFromInfo(notifyMessage), 'yeelight')
+                    deviceManager.saveDevices('yeelight');
                     break;
                 case 'M-SEARCH':
-                    logger.debug('Someone is searching for yeelight devices', {rinfo, msg: msg.toString()});
+                    logger.debug('Someone is searching for yeelight devices', {rinfo, msg: notifyMessage});
                     break;
                 default:
-                    logger.warn('UDP 1982 discovery: Unknown message type:', {rinfo, messageType, msg: msg.toString()});
+                    logger.warn('UDP 1982 discovery: Unknown message type:', {rinfo, messageType, msg: notifyMessage});
             }
         });
 

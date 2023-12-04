@@ -1,14 +1,12 @@
 import Extension from "../../core/abstract-extension";
 import {getSunrise, getSunset} from "sunrise-sunset-js";
 import {scheduleJob} from "node-schedule";
-import GenericDevice from "../../devices/generic-device";
 import deviceManager from "../../core/device-manager";
-import Device from "../../core/abscract-device";
-import {DeviceClassRegistry} from "../../core/device-class-registry";
+import {Device} from "../../core/abscract-device";
 
 const logger = require("../../core/logger").logger('sun');
 
-export class SunDevice extends GenericDevice {
+export class SunDevice extends Device {
     public readonly type: string = 'sun';
 }
 
@@ -17,10 +15,6 @@ class SunExtension extends Extension {
         return "sun";
     }
 
-    registerDeviceClasses(deviceClassRegistry: DeviceClassRegistry) {
-        super.registerDeviceClasses(deviceClassRegistry);
-        deviceClassRegistry.register('sun', SunDevice);
-    }
 
     init(): void {
         logger.debug("Running sun");
@@ -51,7 +45,6 @@ class SunExtension extends Extension {
             time: now
         };
     }
-
 
     getNextEvent(): any {
         const now: Date = new Date();

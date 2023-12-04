@@ -1,5 +1,7 @@
 import deviceManager from "../../core/device-manager";
-import Bulb from "../../devices/bulb";
+import {OnOff} from "../../core/traits/OnOff";
+import {Brightness} from "../../core/traits/Brightness";
+import {ColorTemperature} from "../../core/traits/ColorTemperature";
 
 const logger = require('../../core/logger').logger('google-home-execute');
 
@@ -10,7 +12,6 @@ export default class Execute {
             status: 'SUCCESS',
             states: {
                 online: true,
-                // on: true,
             },
         };
 
@@ -23,35 +24,35 @@ export default class Execute {
 
                     switch (execution.command) {
                         case 'action.devices.commands.OnOff':
-                            if (device instanceof Bulb) {
+                            if (device.supports(OnOff)) {
                                 if (typeof execution.params.on !== 'undefined') {
                                     if (execution.params.on) {
-                                        device.turnOn();
+                                        OnOff(device).turnOn();
                                     } else {
-                                        device.turnOff();
+                                        OnOff(device).turnOff();
                                     }
                                     Object.assign(result.states, {on: execution.params.on});
                                 }
                             }
                             break;
                         case 'action.devices.commands.BrightnessAbsolute':
-                            if (device instanceof Bulb) {
+                            if (device.supports(Brightness)) {
                                 if (typeof execution.params.brightness !== 'undefined') {
-                                    device.setBrightnessPercentage(execution.params.brightness);
+                                    Brightness(device).setBrightnessPercentage(execution.params.brightness);
                                     Object.assign(result.states, {brightness: execution.params.brightness});
                                 }
                             }
                             break;
                         case 'action.devices.commands.ColorAbsolute':
-                            if (device instanceof Bulb) {
+                            if (device.supports(ColorTemperature)) {
                                 if (typeof execution.params.color.temperature !== 'undefined') {
-                                    device.setColorTemperatureKelvin(execution.params.color.temperature);
+                                    ColorTemperature(device).setColorTemperatureKelvin(execution.params.color.temperature);
                                     Object.assign(result.states, {color: {temperatureK: execution.params.color.temperature}});
                                 }
                             }
                             break;
                         default:
-                            logger.error('Unknown command', {execution});
+                            logger.error('Command not implemented', {execution});
                     }
                 }
             }
