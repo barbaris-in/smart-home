@@ -13,11 +13,11 @@ class AutomationExtension extends Extension {
     }
 
     init(): void {
-        logger.debug("Running kalyna autorations");
+        logger.debug("Running kalyna automations");
 
         this.motion('Hallway Motion Sensor', 'Hallway Light', 60);
         this.motion('Bathroom Motion Sensor', 'Bathroom Mirror Light', 60 * 10);
-        this.motion('Kitchen Motion Sensor', '0x0000000008016701', 60 * 10);
+        this.motion('Kitchen Motion Sensor', 'Kitchen Light Stripe', 60 * 10);
 
         this.desktop();
     }

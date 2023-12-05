@@ -25,7 +25,7 @@ class YeelightDeviceLocator extends Extension {
     protected static deviceFromInfo(info: string): Device {
         const {id, name, ip, port, model} = YeelightDeviceLocator.parseNotifyMessage(info);
 
-        const device = new Device(id, name, {
+        const device = new Device(id, name ? name : id, {
             'OnOff': new OnOffTrait((state: boolean) => {
                 const client = new net.Socket();
                 if (!ip || !port) {
@@ -61,8 +61,11 @@ class YeelightDeviceLocator extends Extension {
             switch (messageType) {
                 case 'NOTIFY':
                     logger.debug('Advertising', {rinfo, msg: notifyMessage});
-                    deviceManager.addDevice(YeelightDeviceLocator.deviceFromInfo(notifyMessage), 'yeelight')
-                    deviceManager.saveDevices('yeelight');
+                    const deviceId = YeelightDeviceLocator.parseNotifyMessage(notifyMessage).id;
+                    if (!deviceManager.hasDevice(deviceId)) {
+                        deviceManager.addDevice(YeelightDeviceLocator.deviceFromInfo(notifyMessage), 'yeelight')
+                        deviceManager.saveDevices('yeelight');
+                    }
                     break;
                 case 'M-SEARCH':
                     logger.debug('Someone is searching for yeelight devices', {rinfo, msg: notifyMessage});

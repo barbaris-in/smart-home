@@ -4,3 +4,6 @@ node_modules
 config/
 logs/
 smart-home-data/
+data/
+src/extensions/zcube/
+Makefile

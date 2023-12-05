@@ -1,6 +1,18 @@
 import actions from './actions';
 
 export abstract class Trait {
+    protected parentDevice?: Device;
+
+    public setParentDevice(device: Device) {
+        this.parentDevice = device;
+    }
+
+    public getParentDevice(): Device {
+        if (!this.parentDevice) {
+            throw new Error('Parent device is not set');
+        }
+        return this.parentDevice;
+    }
 }
 
 export class Device {
@@ -8,6 +20,9 @@ export class Device {
     public readonly properties: { [key: string]: boolean | number | string } = {}
 
     constructor(public readonly id: string, public name: string, public readonly traits: { [key: string]: Trait } = {}) {
+        for (const trait of Object.values(traits)) {
+            (trait as Trait).setParentDevice(this);
+        }
     }
 
     public supports(traitFunction: Function): boolean {
