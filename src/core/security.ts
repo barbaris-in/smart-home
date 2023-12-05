@@ -18,6 +18,7 @@ export default class Security {
      * }
      */
     public static authorize(req: any): Promise<any> {
+        // todo: cache authorized users for a while
         return new Promise((resolve, reject) => {
             const authHeader = req.headers.authorization;
             if (!authHeader) {
@@ -34,6 +35,7 @@ export default class Security {
             axios.get('https://auth.barbaris.in/validate?access_token=' + token)
                 .then((res) => {
                     const user = res.data.user;
+                    logger.debug('User', {user});
                     if (allowedUsers.indexOf(user.username) !== -1) {
                         resolve(user);
                     } else {
