@@ -34,6 +34,7 @@ class MqttExtension extends Extension {
     }
 
     public loadDevices() {
+        // todo: initialize status, brightness, color on startup
         super.loadDevices();
         const data = deviceManager.loadDevices(this.getName());
         for (const deviceId in data) {

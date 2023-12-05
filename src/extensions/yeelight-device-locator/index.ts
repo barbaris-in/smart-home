@@ -25,6 +25,9 @@ class YeelightDeviceLocator extends Extension {
     protected static deviceFromInfo(info: string): Device {
         const {id, name, ip, port, model} = YeelightDeviceLocator.parseNotifyMessage(info);
 
+        // todo: add Brightness support
+        // todo: add Color support
+        // todo: initialize status, brightness, color on startup
         const device = new Device(id, name ? name : id, {
             'OnOff': new OnOffTrait((state: boolean): Promise<void> => {
                 return new Promise((resolve, reject) => {
