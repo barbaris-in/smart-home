@@ -20,8 +20,12 @@ export class MqttTraitsDecider {
                     case (expose.type && expose.type === 'light' && expose.features && true):
                         for (const feature of expose.features) {
                             if (feature.property === 'state') {
-                                traits['OnOff'] = new OnOffTrait((state: boolean): void => {
-                                    MqttTraitsDecider.sendCommand(info.friendly_name, {state: state ? feature.value_on : feature.value_off});
+                                traits['OnOff'] = new OnOffTrait((state: boolean): Promise<void> => {
+                                    return new Promise((resolve, reject) => {
+                                        MqttTraitsDecider.sendCommand(info.friendly_name, {state: state ? feature.value_on : feature.value_off});
+                                        // todo: check if command was successful
+                                        resolve();
+                                    });
                                 });
                             }
                             if (feature.property === 'brightness') {

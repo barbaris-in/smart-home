@@ -86,6 +86,14 @@ class AutomationExtension extends Extension {
             brightnessMode = !brightnessMode;
             logger.debug('Switched to', {mode: brightnessMode ? 'brightness' : 'color temperature'});
         });
+        cube.on('slide', () => {
+            OnOff(bulb).toggle()
+                .then(() => {
+                    console.log('Toggled');
+                }).catch((e) => {
+                    console.error(e);
+                });
+        });
     }
 }
 

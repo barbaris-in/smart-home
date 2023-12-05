@@ -3,7 +3,8 @@ import timers from "../timers";
 
 export class OnOffTrait extends Trait {
     protected onOff: boolean | null = null;
-    constructor(protected callback: (state: boolean) => void) {
+
+    constructor(protected callback: (state: boolean) => Promise<void>) {
         super();
     }
 
@@ -11,28 +12,36 @@ export class OnOffTrait extends Trait {
         this.onOff = state;
     }
 
-    turnOn(): void {
+    turnOn(): Promise<void> {
         this.onOff = true;
-        this.callback(this.onOff);
         timers.clearTimer(this.getParentDevice().name);
+        return this.callback(this.onOff)
     }
 
-    turnOff(): void {
+    turnOff(): Promise<void> {
         this.onOff = false;
-        this.callback(this.onOff);
         timers.clearTimer(this.getParentDevice().name);
+        return this.callback(this.onOff)
     }
 
-    public turnOffAfter(timeout: number): void {
-        const timer = setTimeout(() => {
-            this.turnOff();
-        }, timeout * 1000);
-        timers.refreshTimer(this.getParentDevice().name, timer);
+    public turnOffAfter(timeout: number): Promise<void> {
+        return new Promise((resolve, reject) => {
+            const timer = setTimeout(() => {
+                this.turnOff()
+                    .then(() => {
+                        resolve()
+                    })
+                    .catch((err: any) => {
+                        reject(err)
+                    });
+            }, timeout * 1000);
+            timers.refreshTimer(this.getParentDevice().name, timer);
+        });
     }
 
-    toggle(): void {
+    toggle(): Promise<void> {
         this.onOff = !this.onOff;
-        this.callback(this.onOff);
+        return this.callback(this.onOff);
     }
 
     getOnOff(): boolean {
