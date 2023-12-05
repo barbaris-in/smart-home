@@ -22,7 +22,7 @@ export default class Query {
                 responseDevice.brightness = Brightness(device).getBrightnessPercentage();
             }
             if (device.supports(ColorTemperature)) {
-                responseDevice.color.temperatureK = ColorTemperature(device).getColorTemperatureKelvin();
+                responseDevice.color = {temperatureK: ColorTemperature(device).getColorTemperatureKelvin()};
             }
             responseDevice.online = true; // todo: check if device is online
             responseDevices[deviceId] = responseDevice;

@@ -15,7 +15,7 @@ export class BrightnessTrait extends Trait {
     getBrightness(): number {
         if (null === this.brightness) {
             return 50;
-            throw new Error('Brightness value not set yet');
+            // todo: throw new Error('Brightness value not set yet');
         }
         return this.brightness;
     }

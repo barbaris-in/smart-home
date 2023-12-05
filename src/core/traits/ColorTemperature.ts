@@ -39,14 +39,15 @@ export class ColorTemperatureTrait extends Trait {
     public getColorTemperature(): number {
         if (null === this.colorTemperature) {
             return 270;
-            throw new Error('Color temperature value not set yet');
+            // todo: throw new Error('Color temperature value not set yet');
         }
         return this.colorTemperature;
     }
 
     public getColorTemperatureKelvin(): number {
         if (null === this.colorTemperature) {
-            throw new Error('Color temperature is not set');
+            return ColorTemperatureTrait.miradToKelvin(270);
+            // todo: throw new Error('Color temperature is not set');
         }
         return ColorTemperatureTrait.miradToKelvin(this.colorTemperature);
     }

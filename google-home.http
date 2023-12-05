@@ -1,0 +1,85 @@
+### SYNC
+POST {{base_uri}}/fulfillment/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "requestId": "Hello SYNC!",
+  "inputs": [
+    {
+      "intent": "action.devices.SYNC"
+    }
+  ]
+}
+
+### QUERY
+POST {{base_uri}}/fulfillment/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "requestId": "Hello QUERY!",
+  "inputs": [
+    {
+      "intent": "action.devices.QUERY",
+      "payload": {
+        "devices": [
+          {
+            "id": "0x00158d0002b7d6be"
+          },
+          {
+            "id": "0x00158d0004112e6f"
+          },
+          {
+            "id": "0x00158d000446a373"
+          },
+          {
+            "id": "0x00158d00041138dd"
+          },
+          {
+            "id": "0x00158d0004112e41"
+          }
+        ]
+      }
+    }
+  ]
+}
+
+### EXECUTE
+POST {{base_uri}}/fulfillment/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "requestId": "Hello EXECUTE!",
+  "inputs": [
+    {
+      "context": {
+        "locale_country": "US",
+        "locale_language": "en"
+      },
+      "intent": "action.devices.EXECUTE",
+      "payload": {
+        "commands": [
+          {
+            "devices": [
+              {
+                "id": "0x00158d00041138dd"
+              }
+            ],
+            "execution": [
+              {
+                "command": "action.devices.commands.ColorAbsolute",
+                "params": {
+                  "color": {
+                    "temperature": 6000
+                  }
+                }
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

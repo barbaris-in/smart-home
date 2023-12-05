@@ -46,7 +46,8 @@ export class OnOffTrait extends Trait {
 
     getOnOff(): boolean {
         if (null === this.onOff) {
-            throw new Error('OnOff value not set yet');
+            return false;
+            // todo: throw new Error('OnOff value not set yet');
         }
         return this.onOff;
     }
