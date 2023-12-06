@@ -35,14 +35,28 @@ class AutomationExtension extends Extension {
                     const light = deviceManager.getDeviceByName(lightDeviceName);
                     if (light instanceof Device && light.supports(OnOff)) {
                         logger.debug('Light on', {lightDeviceName});
-                        OnOff(light).turnOn();
+                        OnOff(light)
+                            .turnOn()
+                            .then(() => {
+                                logger.debug('Device turned on', {device: lightDeviceName});
+                            })
+                            .catch((error) => {
+                                logger.error('Failed to turn on', {device: lightDeviceName, error});
+                            });
                     }
                 } else {
                     logger.debug('Motion stopped', {motionDeviceName, params});
                     const light = deviceManager.getDeviceByName(lightDeviceName);
                     if (light instanceof Device && light.supports(OnOff)) {
                         logger.debug('Light off', {lightDeviceName});
-                        OnOff(light).turnOffAfter(timeout);
+                        OnOff(light)
+                            .turnOffAfter(timeout)
+                            .then(() => {
+                                logger.debug('Device turned off', {device: lightDeviceName});
+                            })
+                            .catch((error) => {
+                                logger.error('Failed to turn off', {device: lightDeviceName, error});
+                            });
                     }
                 }
             });
@@ -90,7 +104,8 @@ class AutomationExtension extends Extension {
             OnOff(bulb).toggle()
                 .then(() => {
                     console.log('Toggled');
-                }).catch((e) => {
+                })
+                .catch((e) => {
                     console.error(e);
                 });
         });

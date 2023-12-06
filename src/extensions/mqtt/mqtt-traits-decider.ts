@@ -26,17 +26,34 @@ export class MqttTraitsDecider {
                                         // todo: check if command was successful
                                         resolve();
                                     });
+                                }, (properties: { [key: string]: boolean | number | string }): Promise<boolean> => {
+                                    return new Promise((resolve, reject): void => {
+                                        resolve(properties['state'] === 'ON');
+                                    });
                                 });
                             }
                             if (feature.property === 'brightness') {
-                                traits['Brightness'] = new BrightnessTrait(feature.value_min, feature.value_max, (brightness: number): void => {
-                                    MqttTraitsDecider.sendCommand(info.friendly_name, {brightness: brightness});
-                                })
+                                traits['Brightness'] = new BrightnessTrait(
+                                    feature.value_min, feature.value_max,
+                                    (brightness: number): void => {
+                                        MqttTraitsDecider.sendCommand(info.friendly_name, {brightness: brightness});
+                                    }, (properties: { [key: string]: boolean | number | string }): Promise<number> => {
+                                        return new Promise((resolve, reject): void => {
+                                            resolve(properties['brightness'] as number || Math.round((feature.value_max + feature.value_min) / 2));
+                                        });
+                                    });
                             }
                             if (feature.property === 'color_temp') {
-                                traits['ColorTemperature'] = new ColorTemperatureTrait(feature.value_min, feature.value_max, (colorTemperature: number): void => {
-                                    MqttTraitsDecider.sendCommand(info.friendly_name, {color_temp: colorTemperature});
-                                })
+                                traits['ColorTemperature'] = new ColorTemperatureTrait(
+                                    feature.value_min, feature.value_max,
+                                    (colorTemperature: number): void => {
+                                        MqttTraitsDecider.sendCommand(info.friendly_name, {color_temp: colorTemperature});
+                                    },
+                                    (properties: { [key: string]: boolean | number | string }): Promise<number> => {
+                                        return new Promise((resolve, reject): void => {
+                                            resolve(properties['color_temp'] as number || Math.round((feature.value_max + feature.value_min) / 2));
+                                        });
+                                    });
                             }
                         }
                         break;

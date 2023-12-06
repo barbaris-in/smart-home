@@ -73,6 +73,11 @@ class YeelightDeviceLocator extends Extension {
                         });
                     }
                 });
+            }, (): Promise<boolean> => {
+                return new Promise((resolve, reject) => {
+                    // todo: implement init callback
+                    resolve(false);
+                });
             })
         });
         device.setInfo(info);

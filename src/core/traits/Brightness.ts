@@ -1,28 +1,41 @@
 import {Trait, Device} from "../abscract-device";
 
+const logger = require("../logger").logger('brightness');
+
 export class BrightnessTrait extends Trait {
     protected brightness: number | null = null;
     protected defaultBrightness: number = 50;
 
-    constructor(protected minBrightness: number, protected maxBrightness: number, protected callback: (brightness: number) => void) {
+    constructor(
+        public readonly minBrightness: number,
+        public readonly maxBrightness: number,
+        protected readonly commandCallback: (brightness: number) => void,
+        protected readonly initializeCallback: (properties: { [key: string]: boolean | number | string }) => Promise<number>
+    ) {
         super();
     }
 
-    initBrightness(newValue: number) {
-        this.brightness = newValue;
+    initialize() {
+        this.initializeCallback(this.getParentDevice().properties)
+            .then((result: number) => {
+                this.brightness = result;
+            })
+            .catch((err: any) => {
+                console.error('Error refreshing BrightnessTrait', err);
+            });
     }
 
     getBrightness(): number {
         if (null === this.brightness) {
-            return 50;
-            // todo: throw new Error('Brightness value not set yet');
+            logger.error('Brightness value not set yet. Using default value');
+            return Math.round((this.maxBrightness + this.minBrightness) / 2);
         }
         return this.brightness;
     }
 
     setBrightness(brightness: number): void {
         this.brightness = Math.max(this.minBrightness, Math.min(this.maxBrightness, brightness));
-        this.callback(this.brightness);
+        this.commandCallback(this.brightness);
     }
 
     getBrightnessPercentage(): number {

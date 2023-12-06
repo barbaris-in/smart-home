@@ -3,6 +3,12 @@ import actions from './actions';
 export abstract class Trait {
     protected parentDevice?: Device;
 
+    initialize(): void {
+    }
+
+    refresh(): void {
+    }
+
     public setParentDevice(device: Device) {
         this.parentDevice = device;
     }
@@ -30,14 +36,16 @@ export class Device {
     }
 
     setProperty(name: string, newValue: boolean | number | string): void {
-        if (!this.properties[name]) {
-            // todo: new property
-        } else {
-            const oldValue = this.properties[name];
-            if (oldValue !== newValue) {
-                this.emit('property_changed', {name, oldValue, newValue});
-            }
-        }
+        // fix this for boolean properties like `occupancy`
+        // if (typeof this.properties[name] === 'undefined') {
+        //     todo: new property
+            // console.log('new property', name, newValue);
+        // } else {
+        //     const oldValue = this.properties[name];
+        //     if (oldValue !== newValue) {
+                this.emit('property_changed', {name, newValue});
+            // }
+        // }
         this.properties[name] = newValue;
     }
 

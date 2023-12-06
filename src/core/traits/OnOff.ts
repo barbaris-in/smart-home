@@ -1,27 +1,38 @@
 import {Trait, Device} from "../abscract-device";
 import timers from "../timers";
 
+const logger = require("../logger").logger('onoff');
+
 export class OnOffTrait extends Trait {
     protected onOff: boolean | null = null;
 
-    constructor(protected callback: (state: boolean) => Promise<void>) {
+    constructor(
+        protected readonly commandCallback: (state: boolean) => Promise<void>,
+        protected readonly initializeCallback: (properties: { [key: string]: boolean | number | string }) => Promise<boolean>
+    ) {
         super();
     }
 
-    initOnOff(state: boolean): void {
-        this.onOff = state;
+    initialize() {
+        this.initializeCallback(this.getParentDevice().properties)
+            .then((result: boolean) => {
+                this.onOff = result;
+            })
+            .catch((err: any) => {
+                console.error('Error refreshing OnOffTrait', err);
+            });
     }
 
     turnOn(): Promise<void> {
         this.onOff = true;
         timers.clearTimer(this.getParentDevice().name);
-        return this.callback(this.onOff)
+        return this.commandCallback(this.onOff)
     }
 
     turnOff(): Promise<void> {
         this.onOff = false;
         timers.clearTimer(this.getParentDevice().name);
-        return this.callback(this.onOff)
+        return this.commandCallback(this.onOff)
     }
 
     public turnOffAfter(timeout: number): Promise<void> {
@@ -41,13 +52,13 @@ export class OnOffTrait extends Trait {
 
     toggle(): Promise<void> {
         this.onOff = !this.onOff;
-        return this.callback(this.onOff);
+        return this.commandCallback(this.onOff);
     }
 
     getOnOff(): boolean {
         if (null === this.onOff) {
+            logger.error('OnOff value not set yet. Using default value', this);
             return false;
-            // todo: throw new Error('OnOff value not set yet');
         }
         return this.onOff;
     }
