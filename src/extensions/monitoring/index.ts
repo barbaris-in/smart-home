@@ -10,17 +10,16 @@ class Monitoring extends Extension {
 
     constructor() {
         super();
-        const apiUrl = process.env.DATABASE_API_URL;
+        const apiUrl = process.env.MONITORING_DATABASE_API_URL;
         if (!apiUrl) {
             throw new Error('DATABASE_API_URL not set');
         }
-        const database = process.env.DATABASE || 'monitoring';
-        const token = process.env.DATABASE_TOKEN;
+        const database = process.env.MONITORING_DATABASE || 'monitoring';
+        const token = process.env.MONITORING_DATABASE_TOKEN;
         if (!token) {
             throw new Error('DATABASE_TOKEN not set');
         }
         this.db = new WebSQLConnector(apiUrl, database, token);
-
     }
 
     getName(): string {
