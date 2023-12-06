@@ -1,5 +1,6 @@
 import * as winston from 'winston';
-
+// todo: make buffer here
+// todo: handle different log level for different channels
 const loggers = new Map<string, winston.Logger>();
 
 const stringFormat = winston.format.printf((info) => {
@@ -26,14 +27,14 @@ export const logger = function (channel: string): winston.Logger {
                 stringFormat,
             ),
             transports: [
-                new winston.transports.File({
-                    filename: `logs/${channel}.log`,
-                    level: 'debug',
-                }),
-                new winston.transports.File({
-                    filename: 'logs/combined.log',
-                    level: 'debug',
-                }),
+                // new winston.transports.File({
+                //     filename: `logs/${channel}.log`,
+                //     level: 'debug',
+                // }),
+                // new winston.transports.File({
+                //     filename: 'logs/combined.log',
+                //     level: 'debug',
+                // }),
                 new winston.transports.File({
                     filename: 'logs/errors.log',
                     level: 'warn',
