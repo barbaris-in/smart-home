@@ -4,7 +4,7 @@ Smart home automation server with web interface for managing devices and rules i
 
 ## Tech Stack
 
-**Server:** Node, TypesScript
+**Server:** NodeJS, TypesScript
 
 TODO: **Client:** Vue, Vuex, Vuetify
 
