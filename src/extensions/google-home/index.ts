@@ -18,6 +18,10 @@ class GoogleHomeApi extends Extension {
         const app = express();
         app.use(bodyParser.json());
 
+        app.get('/', (req, res) => {
+            res.send('OK');
+        });
+
         app.post('/fulfillment', (req, res) => {
             logger.debug('Fulfillment', {body: req.body});
             Security.authorize(req)
