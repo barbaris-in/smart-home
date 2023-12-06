@@ -9,13 +9,14 @@ interface ListOfDevices {
 }
 
 class HomeDevice {
-    constructor(protected source: string, public readonly device: Device) {
+    constructor(public readonly source: string, public readonly device: Device) {
     }
 }
 
 export class DeviceManager {
     protected devicesById: ListOfDevices = {};
     protected devicesByName: ListOfDevices = {};
+    private autoSaveIntervals: { [key: string]: NodeJS.Timeout } = {};
 
     addDevice(device: Device, source: string): void {
         if (this.hasDevice(device.id)) {
@@ -54,6 +55,17 @@ export class DeviceManager {
                 logger.error('Error saving devices cache file', err);
             }
         });
+        this.enableAutoSave(source);
+    }
+
+    protected enableAutoSave(source: string): void {
+        if (this.autoSaveIntervals[source]) {
+            return;
+        }
+        this.autoSaveIntervals[source] = setInterval(() => {
+            logger.debug('Saving devices', {source});
+            this.saveDevices(source);
+        }, 20 * 60 * 1000);
     }
 
     loadDevices(source: string): any {
@@ -77,7 +89,7 @@ export class YamlFileLoader {
         const result: { [key: string]: {}; } = {};
         for (const homeDeviceId in homeDevices) {
             if (homeDevices[homeDeviceId].source !== source) continue;
-            const homeDevice = homeDevices[homeDeviceId];
+            const homeDevice: HomeDevice = homeDevices[homeDeviceId];
             // const traits: string[] = [];
             // for (const traitName in homeDevice.device.traits) {
             //     const trait = homeDevice.device.traits[traitName];
@@ -85,6 +97,7 @@ export class YamlFileLoader {
             // }
             result[homeDeviceId] = {
                 name: homeDevice.device.name,
+                properties: homeDevice.device.properties,
                 info: homeDevice.device.getInfo(),
             };
         }
