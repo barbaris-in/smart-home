@@ -1,0 +1,13 @@
+### Insert monitoring data into the database
+POST {{db_uri}}/monitoring/insert
+Content-Type: application/json
+Authorization: Bearer {{db_access_token}}
+
+{
+  "sql": "INSERT INTO monitoring (device, metric, value) VALUES (?, ?, ?)",
+  "params": [
+    "test",
+    "test",
+    0.2
+  ]
+}
