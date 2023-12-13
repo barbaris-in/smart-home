@@ -8,6 +8,9 @@ import {ColorTemperature} from "../../core/traits/ColorTemperature";
 const logger = require('../../core/logger').logger('google-home-sync');
 
 export default class Sync {
+    /**
+     * https://developers.home.google.com/cloud-to-cloud/traits
+     */
     static sync(requestId: string, userId: string): any {
         const responseDevices: any[] = [];
         const devices = deviceManager.getDevices();
