@@ -1,9 +1,11 @@
 import Extension from "../../core/abstract-extension";
 import deviceManager from "../../core/device-manager";
-import {Device} from "../../core/abscract-device";
+import {Device} from "../../core/device";
 import {OnOff} from "../../core/traits/OnOff";
 import {Brightness} from "../../core/traits/Brightness";
 import {ColorTemperature} from "../../core/traits/ColorTemperature";
+import telegramBot from "../telegram-bot";
+import {Property} from "../../core/properties";
 
 const logger = require("../../core/logger").logger('kalyna');
 
@@ -12,68 +14,52 @@ class AutomationExtension extends Extension {
         return "kalyna-automations";
     }
 
+    dependsOn(): string[] {
+        return ['sun', 'telegram-bot', 'mqtt', 'yeelight'];
+    }
+
     init(): void {
         logger.debug("Running kalyna automations");
 
         this.motion('Hallway Motion Sensor', 'Hallway Light', 60);
         this.motion('Bathroom Motion Sensor', 'Bathroom Mirror Light', 60 * 10);
-        this.motion('Kitchen Motion Sensor', 'Kitchen Light Stripe', 60 * 10);
+        this.motion('Kitchen Motion Sensor', '0x0000000008016701', 60 * 10);
 
         this.desktop();
+
+        this.door();
+        this.sun();
     }
 
     protected motion(motionDeviceName: string, lightDeviceName: string, timeout: number = 0) {
         const motionSensor = deviceManager.getDeviceByName(motionDeviceName);
         logger.debug('Automate', {motionDeviceName, lightDeviceName, timeout});
-        if (motionSensor instanceof Device) {
-            motionSensor.on('property_changed', (params: any) => {
-                if (params.name !== 'occupancy') {
-                    return;
+        motionSensor.on('property_changed', (params: any) => {
+            if (params.name !== 'occupancy') {
+                return;
+            }
+            if (params.newValue) {
+                logger.debug('Motion detected', {motionDeviceName, params});
+                const light = deviceManager.getDeviceByName(lightDeviceName);
+                if (light.supports(OnOff)) {
+                    logger.debug('Light on', {lightDeviceName});
+                    OnOff(light).turnOn();
                 }
-                if (params.newValue) {
-                    logger.debug('Motion detected', {motionDeviceName, params});
-                    const light = deviceManager.getDeviceByName(lightDeviceName);
-                    if (light instanceof Device && light.supports(OnOff)) {
-                        logger.debug('Light on', {lightDeviceName});
-                        OnOff(light)
-                            .turnOn()
-                            .then(() => {
-                                logger.debug('Device turned on', {device: lightDeviceName});
-                            })
-                            .catch((error) => {
-                                logger.error('Failed to turn on', {device: lightDeviceName, error});
-                            });
-                    }
-                } else {
-                    logger.debug('Motion stopped', {motionDeviceName, params});
-                    const light = deviceManager.getDeviceByName(lightDeviceName);
-                    if (light instanceof Device && light.supports(OnOff)) {
-                        logger.debug('Light off', {lightDeviceName});
-                        OnOff(light)
-                            .turnOffAfter(timeout)
-                            .then(() => {
-                                logger.debug('Device turned off', {device: lightDeviceName});
-                            })
-                            .catch((error) => {
-                                logger.error('Failed to turn off', {device: lightDeviceName, error});
-                            });
-                    }
+            } else {
+                logger.debug('Motion stopped', {motionDeviceName, params});
+                const light: Device = deviceManager.getDeviceByName(lightDeviceName);
+                if (light.supports(OnOff)) {
+                    logger.debug('Light off', {lightDeviceName});
+                    OnOff(light).turnOffAfter(timeout);
                 }
-            });
-        }
+            }
+        });
     }
 
     protected desktop() {
-        const cube: Device | null = deviceManager.getDeviceByName('Cube');
-        if (!(cube instanceof Device)) {
-            logger.error('Cube not found');
-            return;
-        }
-        const bulb: Device | null = deviceManager.getDeviceByName('Office Desk Light');
-        if (null === bulb) {
-            logger.error('Bulb not found');
-            return;
-        }
+        const cube: Device = deviceManager.getDeviceByName('Cube');
+        const bulb: Device = deviceManager.getDeviceByName('Office Desk Light');
+
         if (!(bulb.supports(OnOff))) {
             logger.error('Bulb does not support OnOff');
             return;
@@ -108,6 +94,30 @@ class AutomationExtension extends Extension {
                 .catch((e) => {
                     console.error(e);
                 });
+        });
+    }
+
+    protected door(): void {
+        const doorSensor: Device = deviceManager.getDeviceByName('Door Sensor');
+        const chatId: number = parseFloat(process.env.TELEGRAM_CHAT_ID || '');
+        doorSensor.onPropertyChanged('contact', (newValue: Property) => {
+            console.log('Property changed contact', newValue)
+            if (newValue === false) {
+                telegramBot.sendMessage(chatId, '🚪 Door opened');
+            } else {
+                telegramBot.sendMessage(chatId, '🚪 Door closed');
+            }
+        });
+    }
+
+    protected sun(): void {
+        const chatId: number = parseFloat(process.env.TELEGRAM_CHAT_ID || '');
+        const sun: Device = deviceManager.getDeviceByName('Sun');
+        sun.on('sunrise', () => {
+            telegramBot.sendMessage(chatId, '☀️ Good morning!');
+        });
+        sun.on('sunset', () => {
+            telegramBot.sendMessage(chatId, "🌜 It's going to be dark soon.");
         });
     }
 }

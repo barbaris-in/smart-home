@@ -1,4 +1,4 @@
-import {Device} from "../../core/abscract-device";
+import {Device} from "../../core/device";
 import deviceManager from "../../core/device-manager";
 import {OnOff} from "../../core/traits/OnOff";
 import {Brightness} from "../../core/traits/Brightness";

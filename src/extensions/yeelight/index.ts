@@ -1,29 +1,31 @@
 import Extension from "../../core/abstract-extension";
 import * as dgram from "dgram";
-import {Device} from "../../core/abscract-device";
+import {Device} from "../../core/device";
 import {OnOffTrait} from "../../core/traits/OnOff";
 import deviceManager from "../../core/device-manager";
 
-const logger = require('../../core/logger').logger('yeelight-device-locator');
+const logger = require('../../core/logger').logger('yeelight');
 import * as net from 'net';
 
 
-class YeelightDeviceLocator extends Extension {
+export class Yeelight extends Extension {
     getName(): string {
-        return "yeelight-device-locator";
+        return "yeelight";
+    }
+
+    public static loadingCallback: (datum: any) => void = (datum: any): void => {
+        const device: Device = Yeelight.deviceFromInfo(datum.info);
+        deviceManager.addDevice(device, 'yeelight');
     }
 
     loadDevices() {
         super.loadDevices();
-        const data = deviceManager.loadDevices('yeelight');
-        for (const deviceId in data) {
-            const device: Device = YeelightDeviceLocator.deviceFromInfo(data[deviceId].info);
-            deviceManager.addDevice(device, 'yeelight');
-        }
+        deviceManager.loadDevices('yeelight', Yeelight.loadingCallback);
+
     }
 
     protected static deviceFromInfo(info: string): Device {
-        const {id, name, ip, port, model} = YeelightDeviceLocator.parseNotifyMessage(info);
+        const {id, name, ip, port, model} = Yeelight.parseNotifyMessage(info);
 
         // todo: add Brightness support
         // todo: add Color support
@@ -39,34 +41,76 @@ class YeelightDeviceLocator extends Extension {
                         }
 
                         client.connect(port, ip, () => {
-                            const commandString = JSON.stringify({"id": 1, "method": "set_power", "params": [state ? "on" : "off", "smooth", 500]}) + '\r\n';
+                            const requestId = Math.round(Math.random() * 1000000);
+                            const command = {
+                                "id": requestId,
+                                "method": "set_power",
+                                "params": [
+                                    state ? "on" : "off",
+                                    "smooth",
+                                    500
+                                ]
+                            };
+                            const commandString = JSON.stringify(command) + '\r\n';
                             const timeout = setTimeout(() => {
                                 client.end();
+                                logger.error('Timeout sending command to yeelight device', command);
                                 reject('Timeout');
                             }, 1000);
-                            client.write(commandString, (err) => {
-                                if (err) {
-                                    logger.error('Error sending command', {commandString, err});
-                                    clearTimeout(timeout);
-                                    reject(err);
-                                }
-                                console.log('Command sent', {commandString, err});
-                            });
+                            logger.debug('Sending command to yeelight device', command);
+                            try {
+                                client.write(commandString, (err) => {
+                                    if (err) {
+                                        logger.error('Error sending command', {commandString, err});
+                                        clearTimeout(timeout);
+                                        reject(err);
+                                    }
+                                    logger.debug('Command sent', {commandString});
+                                });
+                            } catch (e) {
+                                logger.error('Error sending command', {commandString, e});
+                                clearTimeout(timeout);
+                                reject(e);
+                            }
                             client.on('data', (data) => {
                                 clearTimeout(timeout);
                                 const dataString = data.toString();
-                                const dataJson = JSON.parse(dataString);
-                                logger.debug('Received response from yeelight device:', {data: dataJson});
-                                if (dataJson.error) {
-                                    logger.error('Error received from server', {dataJson});
-                                    reject(dataJson.error);
+                                let dataJson;
+                                try {
+                                    const dataStrings = dataString.split('\r\n');
+                                    for (const dataString of dataStrings) {
+                                        if (dataString.length > 0) {
+                                            dataJson = JSON.parse(dataString);
+                                            if (dataJson.id === requestId) {
+                                                if (dataJson.result[0] === 'ok') {
+                                                    resolve();
+                                                } else {
+                                                    logger.error('Response from device is not ok', dataJson);
+                                                    reject(dataJson);
+                                                }
+                                                break;
+                                            }
+                                            // logger.debug('Received response from yeelight device:', {data: dataJson});
+                                            // if (dataJson.error) {
+                                            //     logger.error('Error received from server', {dataJson});
+                                            //     reject(dataJson.error);
+                                            // }
+                                        }
+                                    }
+                                } catch (e) {
+                                    logger.error('Error parsing JSON', {dataString, e});
+                                    reject(e);
                                 }
-                                if (dataJson.result[0] === 'ok') {
-                                    resolve();
-                                } else {
-                                    logger.error('Response from device is not ok', {dataJson});
-                                    reject(dataJson.result);
-                                }
+                                // if (dataJson.error) {
+                                //     logger.error('Error received from server', {dataJson});
+                                //     reject(dataJson.error);
+                                // }
+                                // if (dataJson.result[0] === 'ok') {
+                                //     resolve();
+                                // } else {
+                                //     logger.error('Response from device is not ok', {dataJson});
+                                //     reject(dataJson.result);
+                                // }
                                 resolve();
                                 client.end();
                             });
@@ -96,15 +140,12 @@ class YeelightDeviceLocator extends Extension {
         server.on('message', (msg, rinfo) => {
             // logger.debug('Received multicast message', {rinfo, msg: msg.toString()});
             const notifyMessage: string = msg.toString();
-            const messageType = YeelightDeviceLocator.parseMessageType(notifyMessage);
+            const messageType = Yeelight.parseMessageType(notifyMessage);
             switch (messageType) {
                 case 'NOTIFY':
                     logger.debug('Advertising', {rinfo, msg: notifyMessage});
-                    const deviceId = YeelightDeviceLocator.parseNotifyMessage(notifyMessage).id;
-                    if (!deviceManager.hasDevice(deviceId)) {
-                        deviceManager.addDevice(YeelightDeviceLocator.deviceFromInfo(notifyMessage), 'yeelight')
-                        deviceManager.saveDevices('yeelight');
-                    }
+                    deviceManager.addDevice(Yeelight.deviceFromInfo(notifyMessage), 'yeelight')
+                    deviceManager.saveDevices('yeelight');
                     break;
                 case 'M-SEARCH':
                     logger.debug('Someone is searching for yeelight devices', {rinfo, msg: notifyMessage});
@@ -132,6 +173,7 @@ class YeelightDeviceLocator extends Extension {
         });
 
         // Handle SIGINT (Ctrl+C) to close the server gracefully
+        // todo: why is this called twice?
         process.on('SIGINT', () => {
             logger.debug('Closing multicast server', {ip: multicastAddress, port: multicastPort});
             server.close((): void => {
@@ -186,4 +228,4 @@ class YeelightDeviceLocator extends Extension {
     }
 }
 
-export default new YeelightDeviceLocator();
+export default new Yeelight();

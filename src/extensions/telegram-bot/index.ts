@@ -38,6 +38,10 @@ class TelegramBot extends Extension {
             logger.error(reason);
         });
     }
+
+    sendMessage(chatId: number, message: string): void {
+        this.bot.telegram.sendMessage(chatId, message).catch((e) => logger.error('Error sending message', {message, e}));
+    }
 }
 
 export default new TelegramBot();

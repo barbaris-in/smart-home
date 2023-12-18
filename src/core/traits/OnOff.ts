@@ -1,5 +1,7 @@
-import {Trait, Device} from "../abscract-device";
+import {Device} from "../device";
 import timers from "../timers";
+import Trait from "../trait";
+import {Properties} from "../properties";
 
 const logger = require("../logger").logger('onoff');
 
@@ -8,13 +10,13 @@ export class OnOffTrait extends Trait {
 
     constructor(
         protected readonly commandCallback: (state: boolean) => Promise<void>,
-        protected readonly initializeCallback: (properties: { [key: string]: boolean | number | string }) => Promise<boolean>
+        protected readonly initializeCallback: (properties: Properties) => Promise<boolean>
     ) {
         super();
     }
 
     initialize() {
-        this.initializeCallback(this.getParentDevice().properties)
+        this.initializeCallback(this.getDevice().properties)
             .then((result: boolean) => {
                 this.onOff = result;
             })
@@ -23,31 +25,27 @@ export class OnOffTrait extends Trait {
             });
     }
 
-    turnOn(): Promise<void> {
+    turnOn(): void {
         this.onOff = true;
-        timers.clearTimer(this.getParentDevice().name);
-        return this.commandCallback(this.onOff)
-    }
-
-    turnOff(): Promise<void> {
-        this.onOff = false;
-        timers.clearTimer(this.getParentDevice().name);
-        return this.commandCallback(this.onOff)
-    }
-
-    public turnOffAfter(timeout: number): Promise<void> {
-        return new Promise((resolve, reject) => {
-            const timer = setTimeout(() => {
-                this.turnOff()
-                    .then(() => {
-                        resolve()
-                    })
-                    .catch((err: any) => {
-                        reject(err)
-                    });
-            }, timeout * 1000);
-            timers.refreshTimer(this.getParentDevice().name, timer);
+        timers.clearTimer(this.getDevice().name);
+        this.commandCallback(this.onOff).catch((err: any) => {
+            logger.error('Failed to turn on', err);
         });
+    }
+
+    turnOff(): void {
+        this.onOff = false;
+        timers.clearTimer(this.getDevice().name);
+        this.commandCallback(this.onOff).catch((err: any) => {
+            logger.error('Failed to turn off', err);
+        });
+    }
+
+    public turnOffAfter(timeout: number): void {
+        const timer = setTimeout(() => {
+            this.turnOff();
+        }, timeout * 1000);
+        timers.refreshTimer(this.getDevice().name, timer);
     }
 
     toggle(): Promise<void> {

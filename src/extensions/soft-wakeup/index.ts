@@ -1,6 +1,6 @@
 import Extension from "../../core/abstract-extension";
 import deviceManager from "../../core/device-manager";
-import {Device} from "../../core/abscract-device";
+import {Device} from "../../core/device";
 import {Brightness} from "../../core/traits/Brightness";
 import {scheduleJob} from "node-schedule";
 import {ColorTemperature} from "../../core/traits/ColorTemperature";
@@ -58,8 +58,8 @@ class SoftWakeup extends Extension {
     }
 
     init(): void {
-        logger.debug("Running soft wakeup", {at: new Date('2023-12-06 10:51')});
-        this.setUpWakeUp();
+        // logger.debug("Running soft wakeup", {at: new Date('2023-12-06 10:51')});
+        // this.setUpWakeUp();
     }
 }
 

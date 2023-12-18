@@ -1,8 +1,10 @@
-import {Trait} from "../../core/abscract-device";
 import {OnOffTrait} from "../../core/traits/OnOff";
 import mqtt from "./index";
 import {BrightnessTrait} from "../../core/traits/Brightness";
 import {ColorTemperatureTrait} from "../../core/traits/ColorTemperature";
+import {TemperatureSensorTrait} from "../../core/traits/TemperatureSensor";
+import Trait from "../../core/trait";
+import {Properties} from "../../core/properties";
 
 const logger = require('../../core/logger').logger('mqtt-decider');
 
@@ -26,9 +28,9 @@ export class MqttTraitsDecider {
                                         // todo: check if command was successful
                                         resolve();
                                     });
-                                }, (properties: { [key: string]: boolean | number | string }): Promise<boolean> => {
+                                }, (properties: Properties): Promise<boolean> => {
                                     return new Promise((resolve, reject): void => {
-                                        resolve(properties['state'] === 'ON');
+                                        resolve(properties.get('state') === 'ON');
                                     });
                                 });
                             }
@@ -37,9 +39,14 @@ export class MqttTraitsDecider {
                                     feature.value_min, feature.value_max,
                                     (brightness: number): void => {
                                         MqttTraitsDecider.sendCommand(info.friendly_name, {brightness: brightness});
-                                    }, (properties: { [key: string]: boolean | number | string }): Promise<number> => {
+                                    }, (properties: Properties): Promise<number> => {
                                         return new Promise((resolve, reject): void => {
-                                            resolve(properties['brightness'] as number || Math.round((feature.value_max + feature.value_min) / 2));
+                                            if (!properties.has('brightness')) {
+                                                logger.error('Brightness is not set', {properties});
+                                                // reject(new Error('Brightness is not set'));
+                                                resolve(Math.round((feature.value_max + feature.value_min) / 2));
+                                            }
+                                            resolve(<number>properties.get('brightness'));
                                         });
                                     });
                             }
@@ -49,15 +56,26 @@ export class MqttTraitsDecider {
                                     (colorTemperature: number): void => {
                                         MqttTraitsDecider.sendCommand(info.friendly_name, {color_temp: colorTemperature});
                                     },
-                                    (properties: { [key: string]: boolean | number | string }): Promise<number> => {
+                                    (properties: Properties): Promise<number> => {
                                         return new Promise((resolve, reject): void => {
-                                            resolve(properties['color_temp'] as number || Math.round((feature.value_max + feature.value_min) / 2));
+                                            if (!properties.has('color_temp')) {
+                                                logger.error('Color temperature is not set', {properties});
+                                                // reject(new Error('Color temperature is not set'));
+                                                resolve(Math.round((feature.value_max + feature.value_min) / 2));
+                                            }
+                                            resolve(<number>properties.get('color_temp'));
                                         });
                                     });
                             }
                         }
                         break;
                     case expose.property && true:
+                        if (expose.property === 'temperature') {
+                            traits['TemperatureSensor'] = new TemperatureSensorTrait();
+                        }
+                        if (expose.property === 'humidity') {
+                            traits['HumiditySensor'] = new TemperatureSensorTrait();
+                        }
                         // properties[expose.property] = new Property(expose.property, expose.type);
                         // todo: register property
                         // console.log('action', info.friendly_name);

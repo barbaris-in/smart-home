@@ -1,4 +1,6 @@
-import {Trait, Device} from "../abscract-device";
+import Trait from "../trait";
+import {Properties} from "../properties";
+import {Device} from "../device";
 
 const logger = require("../logger").logger('brightness');
 
@@ -10,13 +12,13 @@ export class BrightnessTrait extends Trait {
         public readonly minBrightness: number,
         public readonly maxBrightness: number,
         protected readonly commandCallback: (brightness: number) => void,
-        protected readonly initializeCallback: (properties: { [key: string]: boolean | number | string }) => Promise<number>
+        protected readonly initializeCallback: (properties: Properties) => Promise<number>
     ) {
         super();
     }
 
     initialize() {
-        this.initializeCallback(this.getParentDevice().properties)
+        this.initializeCallback(this.getDevice().properties)
             .then((result: number) => {
                 this.brightness = result;
             })

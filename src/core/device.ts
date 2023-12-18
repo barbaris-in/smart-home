@@ -1,33 +1,14 @@
 import actions from './actions';
-
-export abstract class Trait {
-    protected parentDevice?: Device;
-
-    initialize(): void {
-    }
-
-    refresh(): void {
-    }
-
-    public setParentDevice(device: Device) {
-        this.parentDevice = device;
-    }
-
-    public getParentDevice(): Device {
-        if (!this.parentDevice) {
-            throw new Error('Parent device is not set');
-        }
-        return this.parentDevice;
-    }
-}
+import {Properties, Property} from "./properties";
+import Trait from "./trait";
 
 export class Device {
     protected info: any;
-    public readonly properties: { [key: string]: boolean | number | string } = {}
+    public readonly properties: Properties = new Properties();
 
     constructor(public readonly id: string, public name: string, public readonly traits: { [key: string]: Trait } = {}) {
         for (const trait of Object.values(traits)) {
-            (trait as Trait).setParentDevice(this);
+            (trait as Trait).setDevice(this);
         }
     }
 
@@ -35,18 +16,19 @@ export class Device {
         return this.traits[traitFunction.name] && true;
     }
 
-    setProperty(name: string, newValue: boolean | number | string): void {
+    setProperty(name: string, newValue: Property): void {
         // fix this for boolean properties like `occupancy`
-        // if (typeof this.properties[name] === 'undefined') {
+        if (!this.properties.has(name)) {
         //     todo: new property
-            // console.log('new property', name, newValue);
-        // } else {
-        //     const oldValue = this.properties[name];
-        //     if (oldValue !== newValue) {
+            console.log('new property', name, newValue);
+        } else {
+            const oldValue = this.properties.get(name);
+            if (oldValue !== newValue) {
                 this.emit('property_changed', {name, newValue});
-            // }
-        // }
-        this.properties[name] = newValue;
+                this.emit(name + '_changed', newValue);
+            }
+        }
+        this.properties.set(name, newValue);
     }
 
     emit(event: string, args: any = {}): void {
@@ -57,6 +39,10 @@ export class Device {
 
     on(event: string, callback: Function): void {
         actions.addCallback(this.name, event, callback);
+    }
+
+    onPropertyChanged(propertyName: string, callback: Function): void {
+        actions.addCallback(this.name, propertyName + '_changed', callback);
     }
 
     public setInfo(info: any): void {

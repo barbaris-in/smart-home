@@ -1,4 +1,6 @@
-import {Trait, Device} from "../abscract-device";
+import {Device} from "../device";
+import Trait from "../trait";
+import {Properties} from "../properties";
 
 const logger = require("../logger").logger('color-temp');
 
@@ -9,13 +11,13 @@ export class ColorTemperatureTrait extends Trait {
         public readonly minColorTemperature: number, // 153
         public readonly maxColorTemperature: number, // 370
         protected readonly commandCallback: (colorTemperature: number) => void,
-        protected readonly initializeCallback: (properties: { [key: string]: boolean | number | string }) => Promise<number>
+        protected readonly initializeCallback: (properties: Properties) => Promise<number>
     ) {
         super();
     }
 
     public initialize(): void {
-        this.initializeCallback(this.getParentDevice().properties)
+        this.initializeCallback(this.getDevice().properties)
             .then((result: number) => {
                 this.colorTemperature = result;
             })

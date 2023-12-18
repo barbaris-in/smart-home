@@ -1,6 +1,6 @@
 import Extension from "../../core/abstract-extension";
 import deviceManager from "../../core/device-manager";
-import {Device} from "../../core/abscract-device";
+import {Device} from "../../core/device";
 
 const logger = require("../../core/logger").logger('internet-access');
 

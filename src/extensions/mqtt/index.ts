@@ -2,14 +2,14 @@ import Extension from "../../core/abstract-extension";
 import * as mqtt from "mqtt";
 import {MqttClient} from "mqtt";
 import deviceManager from "../../core/device-manager";
-import {Device} from "../../core/abscract-device";
+import {Device} from "../../core/device";
 import {MqttTraitsDecider} from "./mqtt-traits-decider";
 
 const logger = require("../../core/logger").logger('mqtt');
 const mqttHost: string | undefined = process.env.MQTT_HOST;
 const mqttPort: string = process.env.MQTT_PORT || '1883';
 
-class MqttExtension extends Extension {
+export class MqttExtension extends Extension {
     protected client: MqttClient | null = null;
 
     constructor() {
@@ -26,6 +26,17 @@ class MqttExtension extends Extension {
         return device;
     }
 
+    static loadingCallback: (datum: any) => void = (datum: any) => {
+        const device = MqttExtension.deviceFromInfo(datum.info);
+        for (const property in datum.properties) {
+            device.setProperty(property, datum.properties[property]);
+        }
+        for (const trait in device.traits) {
+            device.traits[trait].initialize();
+        }
+        deviceManager.addDevice(device, 'mqtt');
+    }
+
     public getMqttClient(): MqttClient {
         if (null === this.client) {
             throw new Error('MQTT client is not available for some reason');
@@ -35,30 +46,13 @@ class MqttExtension extends Extension {
 
     public loadDevices() {
         super.loadDevices();
-        const data = deviceManager.loadDevices(this.getName());
-        for (const deviceId in data) {
-            const device = MqttExtension.deviceFromInfo(data[deviceId].info);
-            for (const property in data[deviceId].properties) {
-                device.setProperty(property, data[deviceId].properties[property]);
-            }
-            for (const trait in device.traits) {
-                device.traits[trait].initialize();
-            }
-            deviceManager.addDevice(device, 'mqtt');
-        }
+        deviceManager.loadDevices(this.getName(), MqttExtension.loadingCallback);
     }
 
     updateDevices(mqttDevices: { ieee_address: string, friendly_name: string }[]): void {
         for (const mqttDevice of mqttDevices) {
             logger.debug('Registering device', mqttDevice);
-            if (!deviceManager.hasDevice(mqttDevice.ieee_address)) {
-                deviceManager.addDevice(MqttExtension.deviceFromInfo(mqttDevice), 'mqtt');
-            } else {
-                // const device = deviceManager.getDevice(mqttDevice.ieee_address);
-                // if (device instanceof GenericDevice) {
-                //     device.updateState(mqttDevice);
-                // }
-            }
+            deviceManager.addDevice(MqttExtension.deviceFromInfo(mqttDevice), 'mqtt');
         }
         deviceManager.saveDevices('mqtt');
     }
