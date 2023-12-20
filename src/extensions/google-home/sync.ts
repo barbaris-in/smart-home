@@ -11,13 +11,13 @@ export default class Sync {
     static sync(requestId: string, userId: string): any {
         const responseDevices: any[] = [];
         const devices = deviceManager.getDevices();
-        for (const deviceId in devices) {
-            const googleDevice = GoogleDeviceType.deviceToGoogleDevice(<Device>devices.get(deviceId));
+        devices.forEach((device: Device, deviceId: string) => {
+            const googleDevice = GoogleDeviceType.deviceToGoogleDevice(device);
             if (null === googleDevice) {
-                continue;
+                return;
             }
-            responseDevices.push();
-        }
+            responseDevices.push(googleDevice);
+        });
 
         logger.info('Synchronizing', {devices: responseDevices});
         return {
