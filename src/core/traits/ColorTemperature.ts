@@ -22,7 +22,7 @@ export class ColorTemperatureTrait extends Trait {
                 this.colorTemperature = result;
             })
             .catch((err: any) => {
-                console.error('Error refreshing BrightnessTrait', err);
+                logger.error('Error refreshing BrightnessTrait', err);
             });
     }
 

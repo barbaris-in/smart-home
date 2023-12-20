@@ -23,7 +23,7 @@ export class BrightnessTrait extends Trait {
                 this.brightness = result;
             })
             .catch((err: any) => {
-                console.error('Error refreshing BrightnessTrait', err);
+                logger.error('Error refreshing BrightnessTrait', err);
             });
     }
 

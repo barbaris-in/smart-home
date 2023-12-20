@@ -87,12 +87,12 @@ class AutomationExtension extends Extension {
             logger.debug('Switched to', {mode: brightnessMode ? 'brightness' : 'color temperature'});
         });
         cube.on('slide', () => {
-            OnOff(bulb).toggle()
+            OnOff(<Device>deviceManager.getDeviceByName('Tree Plug')).toggle()
                 .then(() => {
-                    console.log('Toggled');
+                    logger.debug('Toggled');
                 })
                 .catch((e) => {
-                    console.error(e);
+                    logger.error(e);
                 });
         });
     }
@@ -101,7 +101,6 @@ class AutomationExtension extends Extension {
         const doorSensor: Device = deviceManager.getDeviceByName('Door Sensor');
         const chatId: number = parseFloat(process.env.TELEGRAM_CHAT_ID || '');
         doorSensor.onPropertyChanged('contact', (newValue: Property) => {
-            console.log('Property changed contact', newValue)
             if (newValue === false) {
                 telegramBot.sendMessage(chatId, '🚪 Door opened');
             } else {

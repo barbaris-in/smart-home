@@ -20,7 +20,6 @@ export class Device {
         // fix this for boolean properties like `occupancy`
         if (!this.properties.has(name)) {
         //     todo: new property
-            console.log('new property', name, newValue);
         } else {
             const oldValue = this.properties.get(name);
             if (oldValue !== newValue) {

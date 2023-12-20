@@ -21,7 +21,7 @@ export class OnOffTrait extends Trait {
                 this.onOff = result;
             })
             .catch((err: any) => {
-                console.error('Error refreshing OnOffTrait', err);
+                logger.error('Error refreshing OnOffTrait', err);
             });
     }
 
