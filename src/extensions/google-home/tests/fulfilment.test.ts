@@ -1,6 +1,6 @@
-import deviceManager, {Devices} from "../../core/device-manager";
-import {MqttExtension} from "../mqtt";
-import Sync from "./sync";
+import deviceManager, {Devices} from "../../../core/device-manager";
+import {MqttExtension} from "../../mqtt";
+import Sync from "../sync";
 
 describe('Sync devices', () => {
     test('Sync devices', () => {

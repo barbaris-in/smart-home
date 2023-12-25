@@ -51,9 +51,15 @@ export default class GoogleDeviceType {
         if (device.name.toLowerCase().includes('light')) {
             return 'action.devices.types.LIGHT';
         }
-        if (device.name.toLowerCase().includes('temperature') && device.name.toLowerCase().includes('sensor')) {
-            return 'action.devices.types.SENSOR';
+        if (device.name.toLowerCase().includes('plug')) {
+            return 'action.devices.types.OUTLET';
         }
+        if (device.name.toLowerCase().includes('outlet')) {
+            return 'action.devices.types.OUTLET';
+        }
+        // if (device.name.toLowerCase().includes('temperature') && device.name.toLowerCase().includes('sensor')) {
+        //     return 'action.devices.types.SENSOR';
+        // }
         return 'unknown';
     }
 }
