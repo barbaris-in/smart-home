@@ -100,11 +100,21 @@ class AutomationExtension extends Extension {
     protected door(): void {
         const doorSensor: Device = deviceManager.getDeviceByName('Door Sensor');
         const chatId: number = parseFloat(process.env.TELEGRAM_CHAT_ID || '');
+        let doorTimer: NodeJS.Timeout | null = null;
         doorSensor.onPropertyChanged('contact', (newValue: Property) => {
             if (newValue === false) {
-                telegramBot.sendMessage(chatId, '🚪 Door opened');
+                telegramBot.sendMessage(chatId, '🚪 Door');
+                setTimeout((): void => {
+                    telegramBot.sendMessage(chatId, '🚪 Door still open');
+                    doorTimer = null;
+                }, 1000 * 60 * 2);
             } else {
-                telegramBot.sendMessage(chatId, '🚪 Door closed');
+                if (doorTimer) {
+                    clearTimeout(doorTimer);
+                    doorTimer = null;
+                } else {
+                    telegramBot.sendMessage(chatId, '🚪 Door closed');
+                }
             }
         });
     }
