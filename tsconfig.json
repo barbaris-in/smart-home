@@ -8,6 +8,6 @@
     "strict": true
   },
   "exclude": [
-    "tests/*.ts"
+    "tests/*"
   ]
 }

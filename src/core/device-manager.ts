@@ -12,7 +12,7 @@ class DeviceSources extends Map<string, Devices> {
 
 export class DeviceManager {
     public readonly devicesById: Devices = new Devices();
-    protected devicesByName: Devices = new Devices();
+    public readonly devicesByName: Devices = new Devices();
     public readonly deviceSources: DeviceSources = new DeviceSources();
     private autoSaveIntervals: { [key: string]: NodeJS.Timeout } = {};
 

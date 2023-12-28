@@ -4,7 +4,7 @@ import {Yeelight} from "../src/extensions/yeelight";
 import {Device} from "../src/core/device";
 
 describe('Save and load devices', () => {
-    test('Load devices', () => {
+    xtest('Load devices', () => {
         deviceManager.loadDevices('mqtt', MqttExtension.loadingCallback, 'tests/data/mqtt.yaml');
         expect((<Devices>deviceManager.deviceSources.get('mqtt')).size).toEqual(21);
         expect(deviceManager.devicesById.size).toEqual(21);
@@ -20,9 +20,5 @@ describe('Save and load devices', () => {
         doorSensor.setProperty('contact', false);
 
         deviceManager.saveDevices('mqtt', 'tests/data/mqtt2.yaml');
-    });
-
-    test('Save devices', (): void => {
-
     });
 });

@@ -1,9 +1,19 @@
- services:
-    smart-home:
-        image: barbaris/smart-home:alpha-1
-        container_name: smart-home
-        network_mode: host
+services:
+#    smart-home:
+##        image: barbaris/smart-home:alpha-1
+#        build:
+#            context: .
+#            dockerfile: Dockerfile
+##        entrypoint: ["bash"]
+#        container_name: smart-home
+#        network_mode: host
+#        volumes:
+#            - ./:/app
+#            - ./smart-home-data/logs:/app/logs
+#            - ./smart-home-data/config:/app/config
+#            - ./smart-home-data/data:/app/data
+    grafana:
+        container_name: grafana
+        image: grafana/grafana
         volumes:
-            - ./smart-home-data/logs:/app/logs
-            - ./smart-home-data/config:/app/config
-            - ./smart-home-data/data:/app/data
+            - ./grafana:/database:ro

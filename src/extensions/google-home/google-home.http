@@ -1,7 +1,57 @@
+### LOG IN
+POST https://auth.barbaris.in/login
+Content-Type: application/json
+
+{
+  "username": "{{google_home_username}}",
+  "password": "{{google_home_password}}",
+  "client_id": "{{google_home_client_id}}"
+}
+
+> {%
+    client.test('Request executed successfully', function () {
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+
+    client.test('Response contains code', function () {
+        client.assert(response.body.code !== undefined, "Code is undefined");
+    });
+
+    const {code} = response.body;
+    client.global.set("code", code);
+%}
+
+### Get refresh token by code
+POST https://auth.barbaris.in/token
+Content-Type: application/json
+
+{
+  "grant_type": "authorization_code",
+  "code": "{{code}}"
+}
+
+> {%
+    client.test('Request executed successfully', function () {
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+
+    client.test('Response contains refresh token', function () {
+        client.assert(response.body.refresh_token !== undefined, "Refresh token is undefined");
+    });
+
+    client.test('Response contains access token', function () {
+        client.assert(response.body.access_token !== undefined, "Access token is undefined");
+    });
+
+    const {refresh_token, access_token} = response.body;
+    client.global.set("refresh_token", refresh_token);
+    client.global.set("access_token", access_token);
+%}
+
 ### SYNC
 POST {{base_uri}}/fulfillment/
 Content-Type: application/json
-Authorization: Bearer {{token}}
+Authorization: Bearer {{access_token}}
 
 {
   "requestId": "Hello SYNC!",
@@ -15,7 +65,7 @@ Authorization: Bearer {{token}}
 ### QUERY
 POST {{base_uri}}/fulfillment/
 Content-Type: application/json
-Authorization: Bearer {{token}}
+Authorization: Bearer {{access_token}}
 
 {
   "requestId": "Hello QUERY!",
@@ -48,7 +98,7 @@ Authorization: Bearer {{token}}
 ### EXECUTE
 POST {{base_uri}}/fulfillment/
 Content-Type: application/json
-Authorization: Bearer {{token}}
+Authorization: Bearer {{access_token}}
 
 {
   "requestId": "Hello EXECUTE!",
