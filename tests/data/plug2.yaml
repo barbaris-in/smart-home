@@ -1,0 +1,166 @@
+'0x7cb94c7781990000':
+    name: Plug 2
+    properties: {}
+    info:
+        date_code: 20210610-BL
+        definition:
+            description: Zigbee 3.0 smart plug 13A (UK version)
+            exposes:
+                - access: 1
+                  description: Instantaneous measured power
+                  label: Power
+                  name: power
+                  property: power
+                  type: numeric
+                  unit: W
+                - access: 1
+                  description: Instantaneous measured electrical current
+                  label: Current
+                  name: current
+                  property: current
+                  type: numeric
+                  unit: A
+                - access: 1
+                  description: Measured electrical potential value
+                  label: Voltage
+                  name: voltage
+                  property: voltage
+                  type: numeric
+                  unit: V
+                - features:
+                      - access: 7
+                        description: On/off state of the switch
+                        label: State
+                        name: state
+                        property: state
+                        type: binary
+                        value_off: 'OFF'
+                        value_on: 'ON'
+                        value_toggle: TOGGLE
+                  type: switch
+                - access: 1
+                  description: Link quality (signal strength)
+                  label: Linkquality
+                  name: linkquality
+                  property: linkquality
+                  type: numeric
+                  unit: lqi
+                  value_max: 255
+                  value_min: 0
+            model: BSD29
+            options:
+                - access: 2
+                  description: >-
+                      State actions will also be published as 'action' when true (default
+                      false).
+                  label: State action
+                  name: state_action
+                  property: state_action
+                  type: binary
+                  value_off: false
+                  value_on: true
+                - access: 2
+                  description: >-
+                      Calibrates the power value (percentual offset), takes into effect on
+                      next report of device.
+                  label: Power calibration
+                  name: power_calibration
+                  property: power_calibration
+                  type: numeric
+                - access: 2
+                  description: >-
+                      Number of digits after decimal point for power, takes into effect on
+                      next report of device.
+                  label: Power precision
+                  name: power_precision
+                  property: power_precision
+                  type: numeric
+                  value_max: 3
+                  value_min: 0
+                - access: 2
+                  description: >-
+                      Calibrates the current value (percentual offset), takes into effect
+                      on next report of device.
+                  label: Current calibration
+                  name: current_calibration
+                  property: current_calibration
+                  type: numeric
+                - access: 2
+                  description: >-
+                      Number of digits after decimal point for current, takes into effect
+                      on next report of device.
+                  label: Current precision
+                  name: current_precision
+                  property: current_precision
+                  type: numeric
+                  value_max: 3
+                  value_min: 0
+                - access: 2
+                  description: >-
+                      Calibrates the voltage value (percentual offset), takes into effect
+                      on next report of device.
+                  label: Voltage calibration
+                  name: voltage_calibration
+                  property: voltage_calibration
+                  type: numeric
+                - access: 2
+                  description: >-
+                      Number of digits after decimal point for voltage, takes into effect
+                      on next report of device.
+                  label: Voltage precision
+                  name: voltage_precision
+                  property: voltage_precision
+                  type: numeric
+                  value_max: 3
+                  value_min: 0
+            supports_ota: false
+            vendor: Woolley
+        disabled: false
+        endpoints:
+            '1':
+                bindings:
+                    - cluster: genOnOff
+                      target:
+                          endpoint: 1
+                          ieee_address: '0xe0798dfffec7b6bc'
+                          type: endpoint
+                clusters:
+                    input:
+                        - genBasic
+                        - genIdentify
+                        - genGroups
+                        - genScenes
+                        - genOnOff
+                        - touchlink
+                        - '64599'
+                        - '64529'
+                    output:
+                        - genOta
+                        - haElectricalMeasurement
+                        - genTime
+                configured_reportings:
+                    - attribute: onOff
+                      cluster: genOnOff
+                      maximum_report_interval: 3600
+                      minimum_report_interval: 0
+                      reportable_change: 0
+                scenes: []
+            '242':
+                bindings: []
+                clusters:
+                    input: []
+                    output:
+                        - greenPower
+                configured_reportings: []
+                scenes: []
+        friendly_name: Plug 2
+        ieee_address: '0x7cb94c7781990000'
+        interview_completed: true
+        interviewing: false
+        manufacturer: eWeLink
+        model_id: CK-BL702-SWP-01(7020)
+        network_address: 34439
+        power_source: Mains (single phase)
+        software_build_id: 1.0.1
+        supported: true
+        type: Router

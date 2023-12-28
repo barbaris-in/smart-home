@@ -7,3 +7,4 @@ smart-home-data/
 data/
 src/extensions/zcube/
 Makefile
+coverage
