@@ -104,7 +104,7 @@ class AutomationExtension extends Extension {
         doorSensor.onPropertyChanged('contact', (newValue: Property) => {
             if (newValue === false) {
                 telegramBot.sendMessage(chatId, '🚪 Door');
-                setTimeout((): void => {
+                doorTimer = setTimeout((): void => {
                     telegramBot.sendMessage(chatId, '🚪 Door still open');
                     doorTimer = null;
                 }, 1000 * 60 * 2);
