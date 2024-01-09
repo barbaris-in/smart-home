@@ -29,6 +29,12 @@ class AutomationExtension extends Extension {
 
         this.door();
         this.sun();
+
+        const bulb: Device = deviceManager.getDeviceByName('Bedroom Desk Light');
+        const chatId: number = parseFloat(process.env.TELEGRAM_CHAT_ID || '');
+        bulb.on('wakeup', () => {
+            telegramBot.sendMessage(chatId, '🌅 Wake up'+(new Date()).getTimezoneOffset());
+        });
     }
 
     protected motion(motionDeviceName: string, lightDeviceName: string, timeout: number = 0) {

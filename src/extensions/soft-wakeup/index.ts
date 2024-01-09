@@ -18,11 +18,12 @@ class SoftWakeup extends Extension {
 
     setUpWakeUp(): void {
         const rule = new RecurrenceRule();
-        rule.hour = 7;
+        rule.hour = 5 + Math.round((new Date()).getTimezoneOffset() / 60);
         rule.minute = 0;
         scheduleJob(rule, (): void => {
             logger.debug("Wake up");
             const bulb: Device = deviceManager.getDeviceByName('Bedroom Desk Light');
+            bulb.emit('wakeup');
             if (bulb.supports(Brightness)) {
                 const maxBrightness = Brightness(bulb).maxBrightness;
                 const minColorTemperature = ColorTemperature(bulb).minColorTemperature;
