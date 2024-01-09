@@ -4,7 +4,41 @@ import {WebSQLConnector} from "./database/websql-connector";
 import AbstractDatabaseConnector from "./database/abstract-connector";
 
 const logger = require('../../core/logger').logger('monitoring');
-// todo: add buffer here
+
+// todo: use this buffer
+export class MonitoringBuffer {
+    protected readonly buffer: { timestamp: number, device: string, metric: string, value: any }[] = [];
+
+    constructor(
+        protected readonly flushCallback: Function,
+        protected readonly size: number,
+        protected readonly timeout?: number
+    ) {
+        if (timeout) {
+            setInterval(() => {
+                this.flush();
+            }, timeout);
+        }
+    }
+
+    add(timestamp: number, device: string, metric: string, value: any): void {
+        this.buffer.push({timestamp, device, metric, value});
+        if (this.buffer.length >= this.size) {
+            this.flush();
+        }
+    }
+
+    flush(): void {
+        logger.debug('Flushing buffer');
+        this.flushCallback(this.buffer);
+        this.buffer.splice(0, this.buffer.length);
+    }
+
+    getSize(): number {
+        return this.buffer.length;
+    }
+}
+
 class Monitoring extends Extension {
     protected readonly apiUrl: string;
     protected readonly database: string;
