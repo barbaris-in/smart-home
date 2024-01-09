@@ -2,6 +2,7 @@ import {Device} from "../../core/device";
 import {OnOff} from "../../core/traits/OnOff";
 import {Brightness} from "../../core/traits/Brightness";
 import {ColorTemperature} from "../../core/traits/ColorTemperature";
+import {SecuritySystem} from "../security-system/SecuritySystem";
 
 /**
  * https://developers.home.google.com/cloud-to-cloud/guides
@@ -26,10 +27,62 @@ export default class GoogleDeviceType {
                 "temperatureMaxK": ColorTemperature(device).maxColorTemperatureKelvin,
             }
         }
+        if (device.supports(SecuritySystem)) {
+            traits.push('action.devices.traits.ArmDisarm');
+            traits.push('action.devices.traits.StatusReport');
+
+            attributes.availableArmLevels = {
+                levels: [
+                    {
+                        level_name: "disarmed_key",
+                        level_values: [
+                            {
+                                level_synonym: [
+                                    "Disarmed",
+                                    "level 0",
+                                    "disarmed",
+                                    "SL0"
+                                ],
+                                lang: "en"
+                            }
+                        ]
+                    },
+                    {
+                        level_name: "home_key",
+                        level_values: [
+                            {
+                                level_synonym: [
+                                    "Home and Guarding",
+                                    "level 1",
+                                    "home",
+                                    "SL1"
+                                ],
+                                lang: "en"
+                            }
+                        ]
+                    },
+                    {
+                        level_name: "away_key",
+                        level_values: [
+                            {
+                                level_synonym: [
+                                    "Away and Guarding",
+                                    "level 2",
+                                    "away",
+                                    "SL2"
+                                ],
+                                lang: "en"
+                            }
+                        ]
+                    }
+                ],
+                ordered: true
+            };
+        }
 
         return {
             id: device.id,
-            type: GoogleDeviceType.getDeviceType(device),
+            type: googleDeviceType,
             traits: traits,
             name: {
                 defaultNames: [device.name],
@@ -56,6 +109,9 @@ export default class GoogleDeviceType {
         }
         if (device.name.toLowerCase().includes('outlet')) {
             return 'action.devices.types.OUTLET';
+        }
+        if (device.name.toLowerCase().includes('security')) {
+            return 'action.devices.types.SECURITYSYSTEM';
         }
         // if (device.name.toLowerCase().includes('temperature') && device.name.toLowerCase().includes('sensor')) {
         //     return 'action.devices.types.SENSOR';
