@@ -1,6 +1,6 @@
 {
   "name": "smart-home",
-  "version": "0.2.34",
+  "version": "0.2.37",
   "description": "Barbaris Smart Home",
   "main": "index.js",
   "scripts": {
