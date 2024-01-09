@@ -12,5 +12,4 @@ COPY package-lock.json /app
 COPY index.js /app
 COPY dist /app/dist
 
-RUN #npm install --omit=dev
-RUN npm install
+RUN npm install --omit=dev
