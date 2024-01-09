@@ -33,8 +33,17 @@ class ExtensionsLoader {
 
     initExtensions(): void {
         for(const extension of this.extensions) {
-            logger.debug("Running extension:", {name: extension.getName()});
-            extension.init();
+            logger.debug(`Running extension "${extension.getName()}"`);
+            // todo: make sure extension is loaded
+            // try {
+                extension.init();
+            // } catch (e) {
+            //     logger.error(`Error running extension "${extension.getName()}"`, e);
+            //     setTimeout(() => {
+            //         logger.debug(`Running extension again"${extension.getName()}"`);
+            //         extension.getName()
+            //     }, 5000);
+            // }
         }
     }
 }
