@@ -90,16 +90,21 @@ export class MqttExtension extends Extension {
                     }
                     break;
                 default:
-                    const device: Device | null = deviceManager.getDeviceByName(topics[1]);
-                    if (device) {
-                        if (eventParams.action) {
-                            device.emit(eventParams.action, eventParams)
-                        } else {
-                            for (const eventParam in eventParams) {
-                                device.setProperty(eventParam, eventParams[eventParam]);
+                    const deviceName: string = topics[1];
+                    try {
+                        const device: Device = deviceManager.getDeviceByName(deviceName);
+                        if (device) {
+                            if (eventParams.action) {
+                                device.emit(eventParams.action, eventParams)
+                            } else {
+                                for (const eventParam in eventParams) {
+                                    device.setProperty(eventParam, eventParams[eventParam]);
+                                }
                             }
+                            // device.emit(eventParams.action ?? 'status_changed', eventParams);
                         }
-                        // device.emit(eventParams.action ?? 'status_changed', eventParams);
+                    } catch (e) {
+                        logger.error('Could not find device', {name: deviceName});
                     }
                     break;
             }

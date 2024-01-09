@@ -2,7 +2,6 @@ import {OnOffTrait} from "../../core/traits/OnOff";
 import mqtt from "./index";
 import {BrightnessTrait} from "../../core/traits/Brightness";
 import {ColorTemperatureTrait} from "../../core/traits/ColorTemperature";
-import {TemperatureSensorTrait} from "../../core/traits/TemperatureSensor";
 import Trait from "../../core/trait";
 import {Properties} from "../../core/properties";
 
@@ -19,7 +18,7 @@ export class MqttTraitsDecider {
         if (info.definition && info.definition.exposes && info.definition.exposes) {
             for (const expose of info.definition.exposes) {
                 switch (true) {
-                    case (expose.type && expose.type === 'light' && expose.features && true):
+                    case (expose.type && expose.features && true):
                         for (const feature of expose.features) {
                             if (feature.property === 'state') {
                                 traits['OnOff'] = new OnOffTrait((state: boolean): Promise<void> => {
@@ -70,15 +69,14 @@ export class MqttTraitsDecider {
                         }
                         break;
                     case expose.property && true:
-                        if (expose.property === 'temperature') {
-                            traits['TemperatureSensor'] = new TemperatureSensorTrait();
-                        }
-                        if (expose.property === 'humidity') {
-                            traits['HumiditySensor'] = new TemperatureSensorTrait();
-                        }
+                        // if (expose.property === 'temperature') {
+                        //     traits['TemperatureSensor'] = new TemperatureSensorTrait();
+                        // }
+                        // if (expose.property === 'humidity') {
+                        //     traits['HumiditySensor'] = new TemperatureSensorTrait();
+                        // }
                         // properties[expose.property] = new Property(expose.property, expose.type);
                         // todo: register property
-                        // console.log('action', info.friendly_name);
                         // if (result['Action']) {
                         //     logger.error('Action already set for device', info);
                         //     throw new Error('Action already set for device');
