@@ -3,8 +3,19 @@ import Trait from "../../core/trait";
 
 export class SecuritySystemTrait extends Trait {
     protected armed: boolean = false;
+    protected currentArmLevel: string = '';
 
     public initialize(): void {
+    }
+
+    public arm(armLevel: string): void {
+        this.armed = true;
+        this.currentArmLevel = armLevel;
+    }
+
+    public disarm(): void {
+        this.armed = false;
+        this.currentArmLevel = '';
     }
 
     public isArmed(): boolean {
@@ -12,7 +23,7 @@ export class SecuritySystemTrait extends Trait {
     }
 
     getCurrentArmLevel(): string {
-        return 'home_key';
+        return this.currentArmLevel;
     }
 }
 
