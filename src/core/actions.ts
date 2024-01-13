@@ -1,25 +1,51 @@
-class Actions {
-    protected callbacks: { [deviceName: string]: { [event: string]: Function[]; } } = {};
+class DeviceCallbacks extends Map<string, Function[]> {
+}
 
-    public addCallback(deviceName: string, event: string, callback: Function): void {
-        if (!this.callbacks.hasOwnProperty(deviceName)) {
-            this.callbacks[deviceName] = {};
+class Actions extends Map<string, DeviceCallbacks> {
+    public addCallback(deviceName: string, eventName: string, callback: Function): boolean {
+        if (!this.has(deviceName)) {
+            this.set(deviceName, new DeviceCallbacks());
         }
-        if (!this.callbacks[deviceName].hasOwnProperty(event)) {
-            this.callbacks[deviceName][event] = [];
+
+        const deviceCallbacks = this.get(deviceName);
+
+        if (undefined !== deviceCallbacks) {
+            if (!deviceCallbacks.has(eventName)) {
+                deviceCallbacks.set(eventName, []);
+            }
+
+            const eventCallbacks = deviceCallbacks.get(eventName);
+
+            if (undefined !== eventCallbacks) {
+                eventCallbacks.push(callback);
+            }
+
+            return true;
+        } else {
+            return false;
         }
-        this.callbacks[deviceName][event].push(callback);
     }
 
     public getCallbacks(deviceName: string, event: string): Function[] {
-        if (!this.callbacks.hasOwnProperty(deviceName)) {
-            return [];
-        }
-        if (!this.callbacks[deviceName].hasOwnProperty(event)) {
+        if (!this.has(deviceName)) {
             return [];
         }
 
-        return this.callbacks[deviceName][event];
+        const deviceCallbacks = this.get(deviceName);
+        if (undefined === deviceCallbacks || !deviceCallbacks.has(event)) {
+            return [];
+        }
+
+        if (deviceCallbacks.has(event)) {
+            const callbacks = deviceCallbacks.get(event);
+            if (undefined === callbacks) {
+                return [];
+            } else {
+                return callbacks;
+            }
+        }
+
+        return [];
     }
 }
 
