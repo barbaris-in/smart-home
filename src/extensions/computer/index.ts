@@ -82,4 +82,4 @@ class MyComputerExtension extends Extension {
     }
 }
 
-export default new MyComputerExtension();
+// export default new MyComputerExtension();
