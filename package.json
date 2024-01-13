@@ -6,7 +6,8 @@
   "scripts": {
     "compile": "./node_modules/typescript/bin/tsc",
     "start": "node index.js",
-    "test": "npx jest --coverage --verbose"
+    "test": "npx jest --coverage --verbose",
+    "testw": "npx jest --coverage --verbose --watchAll"
   },
   "keywords": [],
   "author": "",
