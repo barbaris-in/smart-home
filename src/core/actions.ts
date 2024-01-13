@@ -1,28 +1,23 @@
-class DeviceCallbacks extends Map<string, Function[]> {
+export class DeviceCallbacks extends Map<string, Function[]> {
 }
 
 class Actions extends Map<string, DeviceCallbacks> {
-    public addCallback(deviceName: string, eventName: string, callback: Function): boolean {
+    public addCallback(deviceName: string, eventName: string, callback: Function): void {
         if (!this.has(deviceName)) {
             this.set(deviceName, new DeviceCallbacks());
         }
 
-        const deviceCallbacks = this.get(deviceName);
+        // @ts-ignore
+        const deviceCallbacks: DeviceCallbacks = this.get(deviceName);
 
-        if (undefined !== deviceCallbacks) {
-            if (!deviceCallbacks.has(eventName)) {
-                deviceCallbacks.set(eventName, []);
-            }
+        if (!deviceCallbacks.has(eventName)) {
+            deviceCallbacks.set(eventName, []);
+        }
 
-            const eventCallbacks = deviceCallbacks.get(eventName);
+        const eventCallbacks = deviceCallbacks.get(eventName);
 
-            if (undefined !== eventCallbacks) {
-                eventCallbacks.push(callback);
-            }
-
-            return true;
-        } else {
-            return false;
+        if (undefined !== eventCallbacks) {
+            eventCallbacks.push(callback);
         }
     }
 
@@ -31,21 +26,14 @@ class Actions extends Map<string, DeviceCallbacks> {
             return [];
         }
 
-        const deviceCallbacks = this.get(deviceName);
-        if (undefined === deviceCallbacks || !deviceCallbacks.has(event)) {
+        // @ts-ignore
+        const deviceCallbacks: DeviceCallbacks = this.get(deviceName);
+        if (deviceCallbacks.has(event)) {
+            // @ts-ignore
+            return deviceCallbacks.get(event);
+        } else {
             return [];
         }
-
-        if (deviceCallbacks.has(event)) {
-            const callbacks = deviceCallbacks.get(event);
-            if (undefined === callbacks) {
-                return [];
-            } else {
-                return callbacks;
-            }
-        }
-
-        return [];
     }
 }
 
