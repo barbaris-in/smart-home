@@ -61,7 +61,6 @@ export default class Query {
             } catch (e: any) {
                 responseDevice.online = false;
                 responseDevice.status = 'ERROR';
-                console.log(e);
                 responseDevice.errorCode = e.message;
                 logger.error('Device not found', {deviceId});
             }

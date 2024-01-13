@@ -72,12 +72,12 @@ Authorization: Bearer {{access_token}}
 
 {
   "requestId": "Hello QUERY!",
-    "inputs": [
-      {
-        "intent": "action.devices.QUERY",
-        "payload": {
-          "devices": [
-            {
+  "inputs": [
+    {
+      "intent": "action.devices.QUERY",
+      "payload": {
+        "devices": [
+          {
             "id": "0x00158d0002b7d6be"
           },
           {
@@ -87,16 +87,16 @@ Authorization: Bearer {{access_token}}
             "id": "0x00158d000446a373"
           },
           {
-              "id": "0x00158d00041138dd"
-            },
-            {
+            "id": "0x00158d00041138dd"
+          },
+          {
               "id": "0x00158d0004112e41"
-            }
-          ]
-        }
+          }
+        ]
       }
+    }
   ]
-  }
+}
 
 ### EXECUTE
 POST {{base_uri}}/fulfillment/

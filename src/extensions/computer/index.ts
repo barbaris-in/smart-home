@@ -56,14 +56,14 @@ class MyComputerExtension extends Extension {
                 //         logger.debug('SSH connection closed.');
                 //     })
                 //     .connect(connectionOptions);
-                logger.debug('Turning off my computer');
-                resolve();
+                if (state) {
+                    logger.debug('Turning on my computer');
+                    resolve();
+                } else {
+                    logger.debug('Turning off my computer');
+                    resolve();
+                }
             });
-            // if (state) {
-            //     // logger.debug('Turning on my computer');
-            // } else {
-            //     logger.debug('Turning off my computer');
-            // }
         }, (properties: Properties): Promise<boolean> => {
             return new Promise((resolve, reject) => {
                 // ping.sys.probe(connectionOptions.host, (isAlive: boolean) => {
@@ -72,14 +72,16 @@ class MyComputerExtension extends Extension {
                 //     logger.debug(`My computer is ${isAlive ? 'on' : 'off'}`);
                 // });
                 logger.debug('Checking if my computer is on');
+                resolve(true);
             });
         });
-        const securitySystem = new Device('computer', 'My Computer', traits);
-        deviceManager.addDevice(securitySystem, 'security-system');
+        const computer = new Device('computer', 'My Computer', traits);
+        OnOff(computer).initialize();
+        deviceManager.addDevice(computer, 'computer');
     }
 
     init(): void {
     }
 }
 
-// export default new MyComputerExtension();
+export default new MyComputerExtension();

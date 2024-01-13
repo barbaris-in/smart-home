@@ -26,7 +26,7 @@ class GoogleHomeApi extends Extension {
         });
 
         app.post('/fulfillment', (req, res) => {
-            logger.debug('Fulfillment', {body: req.body});
+            logger.debug('Request', {body: req.body});
             Security.authorize(req)
                 .then(user => {
                     try {
@@ -34,17 +34,17 @@ class GoogleHomeApi extends Extension {
                         switch (input.intent) {
                             case 'action.devices.SYNC':
                                 const syncContent = Sync.sync(req.body.requestId, user.username);
-                                logger.debug('syncContent', {syncContent});
+                                logger.debug('Sync Response', {syncContent});
                                 res.send(syncContent);
                                 break;
                             case 'action.devices.QUERY':
                                 const queryContent = Query.query(req.body.requestId, input);
-                                logger.debug('queryContent', {queryContent});
+                                logger.debug('Query Response', {queryContent});
                                 res.send(queryContent);
                                 break;
                             case 'action.devices.EXECUTE':
                                 const executeContent = Execute.execute(req.body.requestId, input);
-                                logger.debug('executeContent', {executeContent});
+                                logger.debug('Execute Response', {executeContent});
                                 res.send(executeContent);
                                 break;
                             default:
