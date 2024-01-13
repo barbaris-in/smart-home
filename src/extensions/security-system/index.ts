@@ -23,3 +23,5 @@ class SecuritySystemExtension extends Extension {
         deviceManager.addDevice(securitySystem, 'security-system');
     }
 }
+
+export default new SecuritySystemExtension();
