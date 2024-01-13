@@ -12,14 +12,17 @@ export default class Sync {
         const responseDevices: any[] = [];
         const devices = deviceManager.getDevices();
         devices.forEach((device: Device, deviceId: string) => {
+            logger.debug('Synchronizing device', {deviceId: deviceId});
             const googleDevice = GoogleDeviceType.deviceToGoogleDevice(device);
             if (null === googleDevice) {
+                logger.debug('Device not supported', {deviceId: deviceId});
                 return;
             }
             responseDevices.push(googleDevice);
         });
 
         logger.info('Synchronizing', {devices: responseDevices});
+
         return {
             requestId: requestId,
             payload: {

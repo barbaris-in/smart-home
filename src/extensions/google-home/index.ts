@@ -6,10 +6,13 @@ import Query from "./query";
 import Execute from "./execute";
 import Security from "../../core/security";
 import AuthorizationError from "../../core/authorization-error";
+import {Server} from "node:http";
 
 const logger = require("../../core/logger").logger('google-home');
 
 class GoogleHomeApi extends Extension {
+    protected server: Server | null = null
+
     getName(): string {
         return "google-home";
     }
@@ -48,7 +51,7 @@ class GoogleHomeApi extends Extension {
                                 logger.error('Unknown intent', input);
                         }
                     } catch (e) {
-                        logger.error(e);
+                        logger.error('Could not process request', e);
                         res.status(500).json({message: 'Internal server error'});
                     }
                 })
@@ -66,9 +69,22 @@ class GoogleHomeApi extends Extension {
             throw new Error('Google Home API Port not specified');
         }
 
-        app.listen(port, '0.0.0.0', () => {
+        this.server = app.listen(port, '0.0.0.0', () => {
             logger.info(`Google Home Integration is listening on port ${port}`);
         });
+    }
+
+    unload(): void {
+        logger.debug('Closing Google Home API');
+        if (this.server) {
+            this.server.close((err): void => {
+                if (err) {
+                    logger.error('Error while closing Google Home API', {err});
+                    return;
+                }
+                logger.debug('Google Home API closed');
+            });
+        }
     }
 }
 

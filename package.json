@@ -1,6 +1,6 @@
 {
   "name": "smart-home",
-  "version": "0.2.37",
+  "version": "0.2.53",
   "description": "Barbaris Smart Home",
   "main": "index.js",
   "scripts": {
@@ -20,6 +20,7 @@
     "node-schedule": "^2.1.1",
     "ping": "^0.4.4",
     "sqlite3": "^5.1.6",
+    "ssh2": "^1.15.0",
     "sunrise-sunset-js": "^2.2.1",
     "telegraf": "^4.15.0",
     "winston": "^3.11.0"

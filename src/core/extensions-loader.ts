@@ -45,6 +45,14 @@ class ExtensionsLoader {
             //     }, 5000);
             // }
         }
+
+        process.on('SIGINT', () => {
+            logger.debug('Stopping extensions');
+            for(const extension of this.extensions) {
+                logger.debug(`Stopping extension "${extension.getName()}"`);
+                extension.unload();
+            }
+        });
     }
 }
 

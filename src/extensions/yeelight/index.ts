@@ -6,9 +6,12 @@ import deviceManager from "../../core/device-manager";
 
 const logger = require('../../core/logger').logger('yeelight');
 import * as net from 'net';
+import {Socket} from "dgram";
 
 
 export class Yeelight extends Extension {
+    private server: Socket | null = null;
+
     getName(): string {
         return "yeelight";
     }
@@ -21,7 +24,6 @@ export class Yeelight extends Extension {
     loadDevices() {
         super.loadDevices();
         deviceManager.loadDevices('yeelight', Yeelight.loadingCallback);
-
     }
 
     protected static deviceFromInfo(info: string): Device {
@@ -134,8 +136,8 @@ export class Yeelight extends Extension {
         const multicastPort = 1982;
 
         // Create a UDP socket for receiving
-        const server = dgram.createSocket({type: 'udp4', reuseAddr: true});
-
+        this.server = dgram.createSocket({type: 'udp4', reuseAddr: true});
+        const server = this.server;
         // Set up an event listener for incoming messages
         server.on('message', (msg, rinfo) => {
             // logger.debug('Received multicast message', {rinfo, msg: msg.toString()});
@@ -174,12 +176,15 @@ export class Yeelight extends Extension {
 
         // Handle SIGINT (Ctrl+C) to close the server gracefully
         // todo: why is this called twice?
-        process.on('SIGINT', () => {
-            logger.debug('Closing multicast server', {ip: multicastAddress, port: multicastPort});
-            server.close((): void => {
-                logger.debug('Closed multicast server', {ip: multicastAddress, port: multicastPort});
+    }
+
+    unload(): void {
+        logger.debug('Closing multicast server');
+        if (this.server) {
+            this.server.close((): void => {
+                logger.debug('Multicast server closed');
             });
-        });
+        }
     }
 
     /**

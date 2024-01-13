@@ -113,6 +113,9 @@ export default class GoogleDeviceType {
         if (device.name.toLowerCase().includes('security')) {
             return 'action.devices.types.SECURITYSYSTEM';
         }
+        if (device.name.toLowerCase().includes('computer')) {
+            return 'action.devices.types.OUTLET';
+        }
         // if (device.name.toLowerCase().includes('temperature') && device.name.toLowerCase().includes('sensor')) {
         //     return 'action.devices.types.SENSOR';
         // }

@@ -35,6 +35,8 @@ export class InternetDevice extends Device {
 }
 
 class InternetAccessExtension extends Extension {
+    protected interval: NodeJS.Timeout | null = null;
+
     getName(): string {
         return "internet";
     }
@@ -44,12 +46,18 @@ class InternetAccessExtension extends Extension {
         deviceManager.addDevice(internetDevice, 'internet');
         const ping = require('ping');
         const host = 'google.com';
-        setInterval(() => {
-            ping.sys.probe(host, (isAlive: boolean) => {
-                internetDevice.setStatus(isAlive);
-                logger.debug(`${host} is ${isAlive ? 'alive' : 'dead'}`);
-            });
-        }, 60 * 1000);
+        // this.interval = setInterval(() => {
+        //     ping.sys.probe(host, (isAlive: boolean) => {
+        //         internetDevice.setStatus(isAlive);
+        //         logger.debug(`${host} is ${isAlive ? 'alive' : 'dead'}`);
+        //     });
+        // }, 60 * 1000);
+    }
+
+    unload(): void {
+        // if (this.interval !== null) {
+        //     clearInterval(this.interval);
+        // }
     }
 }
 

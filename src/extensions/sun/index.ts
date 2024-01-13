@@ -1,6 +1,6 @@
 import Extension from "../../core/abstract-extension";
 import {getSunrise, getSunset} from "sunrise-sunset-js";
-import {scheduleJob} from "node-schedule";
+import {Job, scheduleJob} from "node-schedule";
 import deviceManager from "../../core/device-manager";
 import {Device} from "../../core/device";
 
@@ -11,6 +11,7 @@ export class SunDevice extends Device {
 }
 
 class SunExtension extends Extension {
+    private job: Job | null = null;
     getName(): string {
         return "sun";
     }
@@ -25,7 +26,7 @@ class SunExtension extends Extension {
     setupSunEvent(): void {
         const nextEvent = this.getNextEvent();
         logger.debug('Next sun event', {event: nextEvent});
-        scheduleJob(nextEvent.time, (): void => {
+        this.job = scheduleJob(nextEvent.time, (): void => {
             logger.debug('Sun event fired', {event: nextEvent});
             const sun: Device | null = deviceManager.getDeviceByName('Sun');
             if (sun instanceof SunDevice) {
@@ -67,6 +68,12 @@ class SunExtension extends Extension {
         }
 
         return nextEvent;
+    }
+
+    unload(): void {
+        if (this.job !== null) {
+            this.job.cancel();
+        }
     }
 }
 

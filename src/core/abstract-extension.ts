@@ -8,6 +8,9 @@ export default abstract class Extension {
 
     abstract init(): void;
 
+    unload(): void {
+    }
+
     public dependsOn(): string[] {
         return [];
     }

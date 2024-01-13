@@ -22,21 +22,12 @@ class TelegramBot extends Extension {
             logger.debug('Bot started', ctx);
         });
 
-        this.bot.launch()
-            .then(() => {
-                logger.info('Telegram bot has been started');
+        this.bot.launch().then(() => {});
+    }
 
-                process.once('SIGINT', () => {
-                    this.bot.stop('SIGINT');
-                });
-
-                process.once('SIGTERM', () => {
-                    this.bot.stop('SIGTERM')
-                })
-            }).catch(reason => {
-            // todo: restart bot if disconnected
-            logger.error(reason);
-        });
+    unload(): void {
+        logger.debug('Stopping Telegram bot');
+        this.bot.stop();
     }
 
     sendMessage(chatId: number, message: string): void {

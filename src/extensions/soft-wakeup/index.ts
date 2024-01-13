@@ -2,12 +2,13 @@ import Extension from "../../core/abstract-extension";
 import deviceManager from "../../core/device-manager";
 import {Device} from "../../core/device";
 import {Brightness} from "../../core/traits/Brightness";
-import {scheduleJob, RecurrenceRule} from "node-schedule";
+import {scheduleJob, RecurrenceRule, Job} from "node-schedule";
 import {ColorTemperature} from "../../core/traits/ColorTemperature";
 
 const logger = require("../../core/logger").logger('soft-wakeup');
 
 class SoftWakeup extends Extension {
+    private job: Job | null = null;
     getName(): string {
         return "soft-wakeup";
     }
@@ -18,9 +19,9 @@ class SoftWakeup extends Extension {
 
     setUpWakeUp(): void {
         const rule = new RecurrenceRule();
-        rule.hour = 5 + Math.round((new Date()).getTimezoneOffset() / 60);
+        rule.hour = 7 + Math.round((new Date()).getTimezoneOffset() / 60);
         rule.minute = 0;
-        scheduleJob(rule, (): void => {
+        this.job = scheduleJob(rule, (): void => {
             logger.debug("Wake up");
             const bulb: Device = deviceManager.getDeviceByName('Bedroom Desk Light');
             bulb.emit('wakeup');
@@ -53,8 +54,13 @@ class SoftWakeup extends Extension {
     }
 
     init(): void {
-        // logger.debug("Running soft wakeup", {at: new Date('2023-12-06 10:51')});
         this.setUpWakeUp();
+    }
+
+    unload() {
+        if (this.job !== null) {
+            this.job.cancel();
+        }
     }
 }
 

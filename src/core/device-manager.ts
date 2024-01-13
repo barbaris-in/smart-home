@@ -83,6 +83,11 @@ export class DeviceManager {
             logger.debug('Saving devices', {source});
             this.saveDevices(source);
         }, 20 * 60 * 1000);
+
+        process.on('SIGINT', () => {
+            logger.debug('Stopping auto save');
+            clearInterval(this.autoSaveIntervals[source]);
+        });
     }
 
     loadDevices(source: string, callback: Function, filename?: string): void {

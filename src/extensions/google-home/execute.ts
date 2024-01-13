@@ -2,6 +2,7 @@ import deviceManager from "../../core/device-manager";
 import {OnOff} from "../../core/traits/OnOff";
 import {Brightness} from "../../core/traits/Brightness";
 import {ColorTemperature} from "../../core/traits/ColorTemperature";
+import {SecuritySystem} from "../security-system/SecuritySystem";
 
 const logger = require('../../core/logger').logger('google-home-execute');
 
@@ -48,6 +49,25 @@ export default class Execute {
                                 if (typeof execution.params.color.temperature !== 'undefined') {
                                     ColorTemperature(device).setColorTemperatureKelvin(execution.params.color.temperature);
                                     Object.assign(result.states, {color: {temperatureK: execution.params.color.temperature}});
+                                }
+                            }
+                            break;
+                        case 'action.devices.commands.ArmDisarm':
+                            if (execution.params.arm) {
+                                SecuritySystem(device).arm(execution.params.armLevel);
+                                Object.assign(result.states, {
+                                    isArmed: SecuritySystem(device).isArmed(),
+                                    currentArmLevel: SecuritySystem(device).getCurrentArmLevel(),
+                                });
+                            } else {
+                                if (SecuritySystem(device).isArmed()) {
+                                    SecuritySystem(device).disarm();
+                                    Object.assign(result.states, {
+                                        isArmed: false,
+                                        // currentArmLevel: 'disarmed'
+                                    });
+                                } else {
+                                    // send back error
                                 }
                             }
                             break;

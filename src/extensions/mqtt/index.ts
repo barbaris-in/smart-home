@@ -125,13 +125,13 @@ export class MqttExtension extends Extension {
             logger.debug('Reconnecting to MQTT broker');
         });
 
-        // Gracefully close the MQTT connection on process exit
-        process.on('SIGINT', () => {
-            if (this.client !== null) {
-                logger.debug('Closing MQTT connection');
-                this.client.end(() => logger.debug('Closed MQTT connection'));
-            }
-        });
+    }
+
+    public unload(): void {
+        if (this.client !== null) {
+            logger.debug('Closing MQTT connection');
+            this.client.end(true, () => logger.debug('MQTT connection closed'));
+        }
     }
 }
 
