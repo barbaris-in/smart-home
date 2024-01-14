@@ -19,7 +19,7 @@ class SoftWakeup extends Extension {
 
     setUpWakeUp(): void {
         const rule = new RecurrenceRule();
-        rule.hour = 7 + Math.round((new Date()).getTimezoneOffset() / 60);
+        rule.hour = 7;
         rule.minute = 0;
         this.job = scheduleJob(rule, (): void => {
             logger.debug("Wake up");
