@@ -1,13 +1,12 @@
 import Extension from "../../core/abstract-extension";
 import deviceManager from "../../core/device-manager";
 import {WebSQLConnector} from "./database/websql-connector";
-import AbstractDatabaseConnector from "./database/abstract-connector";
 
 const logger = require('../../core/logger').logger('monitoring');
 
-// todo: use this buffer
 export class MonitoringBuffer {
-    protected readonly buffer: { timestamp: number, device: string, metric: string, value: any }[] = [];
+    protected readonly buffer: { timestamp: string, device: string, metric: string, value: any }[] = [];
+    public intervalHandler: NodeJS.Timeout | null = null;
 
     constructor(
         protected readonly flushCallback: Function,
@@ -15,13 +14,13 @@ export class MonitoringBuffer {
         protected readonly timeout?: number
     ) {
         if (timeout) {
-            setInterval(() => {
+            this.intervalHandler = setInterval(() => {
                 this.flush();
             }, timeout);
         }
     }
 
-    add(timestamp: number, device: string, metric: string, value: any): void {
+    add(timestamp: string, device: string, metric: string, value: any): void {
         this.buffer.push({timestamp, device, metric, value});
         if (this.buffer.length >= this.size) {
             this.flush();
@@ -30,6 +29,10 @@ export class MonitoringBuffer {
 
     flush(): void {
         logger.debug('Flushing buffer');
+        if (this.buffer.length < 1) {
+            logger.debug('Buffer is empty');
+            return;
+        }
         this.flushCallback(this.buffer);
         this.buffer.splice(0, this.buffer.length);
     }
@@ -43,6 +46,8 @@ class Monitoring extends Extension {
     protected readonly apiUrl: string;
     protected readonly database: string;
     protected readonly token: string;
+    private readonly db: WebSQLConnector;
+    private readonly buffer: MonitoringBuffer;
 
     constructor() {
         super();
@@ -55,6 +60,20 @@ class Monitoring extends Extension {
         if (!this.token) {
             throw new Error('DATABASE_TOKEN not set');
         }
+
+        this.db = new WebSQLConnector(this.apiUrl, this.database, this.token);
+        this.buffer = new MonitoringBuffer((bufferData: { timestamp: number, device: string, metric: string, value: any }[]): void => {
+            const sql = 'INSERT INTO monitoring (timestamp, device, metric, value) VALUES ' +
+                bufferData.map(() => '(?, ?, ?, ?)').join(', ');
+            const flatValues = bufferData.flatMap(row => [row.timestamp, row.device, row.metric, row.value]);
+            this.db.insert(sql, flatValues)
+                .then(() => {
+                    logger.debug('Inserted', {cnt: bufferData.length})
+                })
+                .catch(err => {
+                    logger.error('Could not insert monitoring data', {err});
+                });
+        }, 10, 60000);
     }
 
     getName(): string {
@@ -62,8 +81,7 @@ class Monitoring extends Extension {
     }
 
     init(): void {
-        const db = new WebSQLConnector(this.apiUrl, this.database, this.token);
-        db.exec('CREATE TABLE IF NOT EXISTS monitoring(\n' +
+        this.db.exec('CREATE TABLE IF NOT EXISTS monitoring(\n' +
             '    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n' +
             '    device TEXT,\n' +
             '    metric TEXT,\n' +
@@ -78,12 +96,20 @@ class Monitoring extends Extension {
 
         deviceManager.getDevices().forEach(device => {
             device.on('property_changed', (args: any) => {
-                db.insert('INSERT INTO monitoring (device, metric, value) VALUES (?, ?, ?)', [device.name, args.name, args.newValue])
-                    .catch(err => {
-                        logger.error('Could not insert monitoring data', {err});
-                    });
+                this.buffer.add((new Date()).toISOString().slice(0, 19).replace('T', ' '), device.name, args.name, args.newValue);
             });
         });
+    }
+
+    unload() {
+        super.unload();
+        if (this.buffer.getSize() > 0) {
+            this.buffer.flush();
+        }
+
+        if (this.buffer.intervalHandler) {
+            clearInterval(this.buffer.intervalHandler);
+        }
     }
 }
 

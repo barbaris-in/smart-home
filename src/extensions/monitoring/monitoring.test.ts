@@ -12,7 +12,7 @@ describe('Monitoring buffer', () => {
         }, 10);
 
         for (let i = 0; i < 20; i++) {
-            buffer.add(Math.round(new Date().getTime() / 1000), 'device', 'metric', i);
+            buffer.add((new Date()).toISOString().slice(0, 19).replace('T', ' '), 'device', 'metric', i);
         }
         expect(buffer.getSize()).toEqual(0);
     });
