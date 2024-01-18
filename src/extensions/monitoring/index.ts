@@ -76,15 +76,14 @@ class Monitoring extends Extension {
                 logger.error('Could not create monitoring table', {err});
             });
 
-        for (const deviceId in deviceManager.getDevices()) {
-            const device = deviceManager.getDevice(deviceId);
+        deviceManager.getDevices().forEach(device => {
             device.on('property_changed', (args: any) => {
                 db.insert('INSERT INTO monitoring (device, metric, value) VALUES (?, ?, ?)', [device.name, args.name, args.newValue])
                     .catch(err => {
                         logger.error('Could not insert monitoring data', {err});
                     });
             });
-        }
+        });
     }
 }
 
