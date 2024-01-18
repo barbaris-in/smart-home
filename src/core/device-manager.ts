@@ -18,8 +18,13 @@ export class DeviceManager {
 
     addDevice(device: Device, source: string): void {
         if (this.devicesById.has(device.id)) {
-            // todo: updated device.
-            // todo: optionally check if device changed
+            const existingDevice: Device = <Device>this.devicesById.get(device.id);
+            if (existingDevice.name !== device.name) {
+                this.devicesByName.delete(existingDevice.name);
+                existingDevice.name = device.name;
+                this.devicesByName.set(device.name, device);
+                logger.info('Device name changed', {id: device.id, oldName: existingDevice.name, newName: device.name});
+            }
         } else {
             this.devicesById.set(device.id, device);
             this.devicesByName.set(device.name, device);
