@@ -22,7 +22,7 @@ class AutomationExtension extends Extension {
         logger.debug("Running kalyna automations");
 
         this.motion('Hallway Motion Sensor', 'Hallway Light', 60);
-        this.motion('Bathroom Motion Sensor', 'Bathroom Mirror Light', 60 * 10);
+        this.presence('Bathroom Presence Sensor', 'Bathroom Mirror Light');
         this.motion('Kitchen Motion Sensor', '0x0000000008016701', 60 * 10);
 
         this.desktop();
@@ -33,7 +33,7 @@ class AutomationExtension extends Extension {
         const bulb: Device = deviceManager.getDeviceByName('Bedroom Desk Light');
         const chatId: number = parseFloat(process.env.TELEGRAM_CHAT_ID || '');
         bulb.on('wakeup', () => {
-            telegramBot.sendMessage(chatId, '🌅 Wake up'+(new Date()).getTimezoneOffset());
+            telegramBot.sendMessage(chatId, '🌅 Wake up', true);
         });
     }
 
@@ -57,6 +57,28 @@ class AutomationExtension extends Extension {
                 if (light.supports(OnOff)) {
                     logger.debug('Light off', {lightDeviceName});
                     OnOff(light).turnOffAfter(timeout);
+                }
+            }
+        });
+    }
+
+    protected presence(motionDeviceName: string, lightDeviceName: string) {
+        const motionSensor = deviceManager.getDeviceByName(motionDeviceName);
+        logger.debug('Automate', {motionDeviceName, lightDeviceName});
+        motionSensor.on('presence_changed', (newValue: any) => {
+            if (newValue) {
+                logger.debug('Presence detected', {motionDeviceName});
+                const light = deviceManager.getDeviceByName(lightDeviceName);
+                if (light.supports(OnOff)) {
+                    logger.debug('Light on', {lightDeviceName});
+                    OnOff(light).turnOn();
+                }
+            } else {
+                logger.debug('Presence stopped', {motionDeviceName});
+                const light: Device = deviceManager.getDeviceByName(lightDeviceName);
+                if (light.supports(OnOff)) {
+                    logger.debug('Light off', {lightDeviceName});
+                    OnOff(light).turnOff();
                 }
             }
         });
