@@ -27,17 +27,19 @@ export class OnOffTrait extends Trait {
 
     turnOn(): void {
         this.onOff = true;
-        timers.clearTimer(this.getDevice().name);
+        const deviceName = this.getDevice().name;
+        timers.clearTimer(deviceName);
         this.commandCallback(this.onOff).catch((err: any) => {
-            logger.error('Failed to turn on', err);
+            logger.error('Failed to turn on', {device: deviceName, err});
         });
     }
 
     turnOff(): void {
         this.onOff = false;
-        timers.clearTimer(this.getDevice().name);
+        const deviceName = this.getDevice().name;
+        timers.clearTimer(deviceName);
         this.commandCallback(this.onOff).catch((err: any) => {
-            logger.error('Failed to turn off', err);
+            logger.error('Failed to turn off', {device: deviceName, err});
         });
     }
 
