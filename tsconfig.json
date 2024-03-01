@@ -5,8 +5,13 @@
     "outDir": "./dist",
     "rootDir": "./src",
     "sourceMap": true,
-    "strict": true
+    "strict": true,
+    "resolveJsonModule": true
   },
+  "include": [
+    "src/**/*",
+    "src/extensions/**/*.json"
+  ],
   "exclude": [
     "tests/*"
   ]

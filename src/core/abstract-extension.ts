@@ -1,17 +1,7 @@
-import deviceManager from "./device-manager";
-
 export default abstract class Extension {
-    abstract getName(): string;
-
-    loadDevices(): void {
+    protected constructor(public readonly name: string) {
     }
 
-    abstract init(): void;
-
-    unload(): void {
-    }
-
-    public dependsOn(): string[] {
-        return [];
+    destructor(): void {
     }
 }
