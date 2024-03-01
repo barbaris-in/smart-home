@@ -42,81 +42,86 @@ export class Yeelight extends Extension {
                             reject('No IP or port');
                         }
 
-                        client.connect(port, ip, () => {
-                            const requestId = Math.round(Math.random() * 1000000);
-                            const command = {
-                                "id": requestId,
-                                "method": "set_power",
-                                "params": [
-                                    state ? "on" : "off",
-                                    "smooth",
-                                    500
-                                ]
-                            };
-                            const commandString = JSON.stringify(command) + '\r\n';
-                            const timeout = setTimeout(() => {
-                                client.end();
-                                logger.error('Timeout sending command to yeelight device', command);
-                                reject('Timeout');
-                            }, 1000);
-                            logger.debug('Sending command to yeelight device', command);
-                            try {
-                                client.write(commandString, (err) => {
-                                    if (err) {
-                                        logger.error('Error sending command', {commandString, err});
-                                        clearTimeout(timeout);
-                                        reject(err);
-                                    }
-                                    logger.debug('Command sent', {commandString});
-                                });
-                            } catch (e) {
-                                logger.error('Error sending command', {commandString, e});
-                                clearTimeout(timeout);
-                                reject(e);
-                            }
-                            client.on('data', (data) => {
-                                clearTimeout(timeout);
-                                const dataString = data.toString();
-                                let dataJson;
+                        try {
+                            client.connect(port, ip, () => {
+                                const requestId = Math.round(Math.random() * 1000000);
+                                const command = {
+                                    "id": requestId,
+                                    "method": "set_power",
+                                    "params": [
+                                        state ? "on" : "off",
+                                        "smooth",
+                                        500
+                                    ]
+                                };
+                                const commandString = JSON.stringify(command) + '\r\n';
+                                const timeout = setTimeout(() => {
+                                    client.end();
+                                    logger.error('Timeout sending command to yeelight device', command);
+                                    reject('Timeout');
+                                }, 1000);
+                                logger.debug('Sending command to yeelight device', command);
                                 try {
-                                    const dataStrings = dataString.split('\r\n');
-                                    for (const dataString of dataStrings) {
-                                        if (dataString.length > 0) {
-                                            dataJson = JSON.parse(dataString);
-                                            if (dataJson.id === requestId) {
-                                                if (dataJson.result[0] === 'ok') {
-                                                    resolve();
-                                                } else {
-                                                    logger.error('Response from device is not ok', dataJson);
-                                                    reject(dataJson);
-                                                }
-                                                break;
-                                            }
-                                            // logger.debug('Received response from yeelight device:', {data: dataJson});
-                                            // if (dataJson.error) {
-                                            //     logger.error('Error received from server', {dataJson});
-                                            //     reject(dataJson.error);
-                                            // }
+                                    client.write(commandString, (err) => {
+                                        if (err) {
+                                            logger.error('Error sending command', {commandString, err});
+                                            clearTimeout(timeout);
+                                            reject(err);
                                         }
-                                    }
+                                        logger.debug('Command sent', {commandString});
+                                    });
                                 } catch (e) {
-                                    logger.error('Error parsing JSON', {dataString, e});
+                                    logger.error('Error sending command', {commandString, e});
+                                    clearTimeout(timeout);
                                     reject(e);
                                 }
-                                // if (dataJson.error) {
-                                //     logger.error('Error received from server', {dataJson});
-                                //     reject(dataJson.error);
-                                // }
-                                // if (dataJson.result[0] === 'ok') {
-                                //     resolve();
-                                // } else {
-                                //     logger.error('Response from device is not ok', {dataJson});
-                                //     reject(dataJson.result);
-                                // }
-                                resolve();
-                                client.end();
+                                client.on('data', (data) => {
+                                    clearTimeout(timeout);
+                                    const dataString = data.toString();
+                                    let dataJson;
+                                    try {
+                                        const dataStrings = dataString.split('\r\n');
+                                        for (const dataString of dataStrings) {
+                                            if (dataString.length > 0) {
+                                                dataJson = JSON.parse(dataString);
+                                                if (dataJson.id === requestId) {
+                                                    if (dataJson.result[0] === 'ok') {
+                                                        resolve();
+                                                    } else {
+                                                        logger.error('Response from device is not ok', dataJson);
+                                                        reject(dataJson);
+                                                    }
+                                                    break;
+                                                }
+                                                // logger.debug('Received response from yeelight device:', {data: dataJson});
+                                                // if (dataJson.error) {
+                                                //     logger.error('Error received from server', {dataJson});
+                                                //     reject(dataJson.error);
+                                                // }
+                                            }
+                                        }
+                                    } catch (e) {
+                                        logger.error('Error parsing JSON', {dataString, e});
+                                        reject(e);
+                                    }
+                                    // if (dataJson.error) {
+                                    //     logger.error('Error received from server', {dataJson});
+                                    //     reject(dataJson.error);
+                                    // }
+                                    // if (dataJson.result[0] === 'ok') {
+                                    //     resolve();
+                                    // } else {
+                                    //     logger.error('Response from device is not ok', {dataJson});
+                                    //     reject(dataJson.result);
+                                    // }
+                                    resolve();
+                                    client.end();
+                                });
                             });
-                        });
+                        } catch (e) {
+                            logger.error('Error connecting to device', {ip, port, e});
+                            reject(e);
+                        }
                     }
                 });
             }, (): Promise<boolean> => {
