@@ -1,4 +1,0 @@
-'0x0000000008016701':
-  name: '0x0000000008016701'
-  properties: {}
-  info: "NOTIFY * HTTP/1.1\r\nHost: 239.255.255.250:1982\r\nCache-Control: max-age=3600\r\nLocation: yeelight://192.168.1.41:55443\r\nNTS: ssdp:alive\r\nServer: POSIX, UPnP/1.0 YGLC/1\r\nid: 0x0000000008016701\r\nmodel: stripe\r\nfw_ver: 73\r\nsupport: get_prop set_default set_power toggle set_bright start_cf stop_cf set_scene cron_add cron_get cron_del set_ct_abx set_rgb set_hsv set_adjust adjust_bright adjust_ct adjust_color set_music set_name\r\npower: on\r\nbright: 100\r\ncolor_mode: 1\r\nct: 4000\r\nrgb: 16777164\r\nhue: 60\r\nsat: 20\r\nname: \r\n"

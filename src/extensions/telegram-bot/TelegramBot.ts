@@ -3,7 +3,7 @@ import {Context, Telegraf} from "telegraf";
 
 const logger = require('../../core/logger').logger('telegram');
 
-export default class TelegramBot extends Extension {
+class TelegramBot extends Extension {
     public readonly bot: Telegraf<Context>;
 
     constructor(name: string) {
@@ -26,7 +26,10 @@ export default class TelegramBot extends Extension {
         this.bot.stop();
     }
 
-    sendMessage(chatId: number, message: string): void {
+    sendMessage(chatId: number, message: string, silent: boolean = false): void {
+        // toto: implement silent mode
         this.bot.telegram.sendMessage(chatId, message).catch((e) => logger.error('Error sending message', {message, e}));
     }
 }
+
+export default new TelegramBot('telegram-bot');
