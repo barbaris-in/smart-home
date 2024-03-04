@@ -8,6 +8,12 @@ const logger = require("../../core/logger").logger('sun');
 
 export class SunDevice extends Device {
     public readonly type: string = 'sun';
+
+    isLateNight(): boolean {
+        const now: Date = new Date();
+
+        return now.getHours() >= 0 && now.getHours() <= 6;
+    }
 }
 
 class SunExtension extends Extension {

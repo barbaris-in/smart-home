@@ -6,6 +6,7 @@ import {Brightness} from "../../core/traits/Brightness";
 import {ColorTemperature} from "../../core/traits/ColorTemperature";
 import telegramBot from "../telegram-bot";
 import {Property} from "../../core/properties";
+import { SunDevice } from "../sun/Sun";
 
 const logger = require("../../core/logger").logger('kalyna');
 
@@ -15,7 +16,7 @@ class AutomationExtension extends Extension {
         logger.debug("Running kalyna automations");
 
         this.motion('Hallway Motion Sensor', 'Hallway Light', 60);
-        this.presence('Bathroom Presence Sensor', 'Bathroom Mirror Light');
+        this.presence('Bathroom Presence Sensor', 'Bathroom Mirror Light', true);
         this.motion('Kitchen Motion Sensor', '0x0000000008016701', 60 * 10);
 
         this.desktop();
@@ -57,8 +58,12 @@ class AutomationExtension extends Extension {
         });
     }
 
-    protected presence(sensorDeviceName: string, lightDeviceName: string) {
-        deviceManager.waitDevices([sensorDeviceName, lightDeviceName], () => {
+    protected presence(sensorDeviceName: string, lightDeviceName: string, dimLateNight: boolean = false) {
+        const devices = [sensorDeviceName, lightDeviceName];
+        if (dimLateNight) {
+            devices.push('Sun');
+        }
+        deviceManager.waitDevices(devices, () => {
             const motionSensor = deviceManager.getDeviceByName(sensorDeviceName);
             logger.debug('Automate', {motionDeviceName: sensorDeviceName, lightDeviceName});
             motionSensor.on('presence_changed', (newValue: any) => {
@@ -67,7 +72,19 @@ class AutomationExtension extends Extension {
                     const light = deviceManager.getDeviceByName(lightDeviceName);
                     if (light.supports(OnOff)) {
                         logger.debug('Light on', {lightDeviceName});
-                        OnOff(light).turnOn();
+                        if (dimLateNight) {
+                            const sun = deviceManager.getDeviceByName('Sun');
+                            if (sun instanceof SunDevice) {
+                                if (sun.isLateNight()) {
+                                    Brightness(light).setBrightness(1);
+                                } else {
+                                    Brightness(light).setBrightnessPercentage(100);
+                                }
+                            }
+                        } else {
+                            OnOff(light).turnOn();
+                        }
+                        Brightness(light).setBrightness(100);
                     }
                 } else {
                     logger.debug('Presence stopped', {motionDeviceName: sensorDeviceName});
