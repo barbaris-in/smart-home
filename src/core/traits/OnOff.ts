@@ -57,7 +57,7 @@ export class OnOffTrait extends Trait {
 
     getOnOff(): boolean {
         if (null === this.onOff) {
-            logger.error('OnOff value not set yet. Using default value', this);
+            logger.error('OnOff value not set yet. Using default value', {device: this.getDevice().name});
             return false;
         }
         return this.onOff;

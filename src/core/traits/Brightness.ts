@@ -29,6 +29,7 @@ export class BrightnessTrait extends Trait {
 
     getBrightness(): number {
         if (null === this.brightness) {
+            // todo: add some context here
             logger.error('Brightness value not set yet. Using default value');
             return Math.round((this.maxBrightness + this.minBrightness) / 2);
         }

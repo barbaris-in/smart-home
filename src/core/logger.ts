@@ -23,14 +23,14 @@ export const logger = function (channel: string): winston.Logger {
             format:winston.format.combine(
                 winston.format.timestamp({format: 'YYYY-MM-DD HH:mm:ss'}),
                 winston.format.simple(),
-                winston.format.colorize(),
+                // winston.format.colorize(),
                 stringFormat,
             ),
             transports: [
-                // new winston.transports.File({
-                //     filename: `logs/${channel}.log`,
-                //     level: 'debug',
-                // }),
+                new winston.transports.File({
+                    filename: `logs/${channel}.log`,
+                    level: 'debug',
+                }),
                 // new winston.transports.File({
                 //     filename: 'logs/combined.log',
                 //     level: 'debug',

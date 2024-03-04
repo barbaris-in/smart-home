@@ -45,7 +45,7 @@ export class ColorTemperatureTrait extends Trait {
 
     public getColorTemperature(): number {
         if (null === this.colorTemperature) {
-            logger('Color temperature is not set. Using average value as default');
+            logger.error('Color temperature is not set. Using average value as default');
             return Math.round((this.maxColorTemperature + this.minColorTemperature) / 2);
         }
         return this.colorTemperature;
