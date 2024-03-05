@@ -16,13 +16,22 @@ class AutomationExtension extends Extension {
         logger.debug("Running kalyna automations");
 
         this.motion('Hallway Motion Sensor', 'Hallway Light', 60);
-        this.presence('Bathroom Presence Sensor', 'Bathroom Mirror Light', true);
+        this.presence('Bathroom Presence Sensor', 'Bathroom Mirror Light');
         this.motion('Kitchen Motion Sensor', '0x0000000008016701', 60 * 10);
 
         this.desktop();
 
         this.door();
         this.sun();
+
+        // deviceManager.waitDevices(['Office Desk Light'], () => {
+        //     setTimeout(() => {
+        //        const officeDeskLight: Device = deviceManager.getDeviceByName('Office Desk Light');
+        //         // if (officeDeskLight.supports(OnOff)) {
+        //              Brightness(officeDeskLight).setBrightnessPercentage(1);
+        //         // }
+        //     });
+        // });
         //
         // const bulb: Device = deviceManager.getDeviceByName('Bedroom Desk Light');
         // const chatId: number = parseFloat(process.env.TELEGRAM_CHAT_ID || '');
@@ -84,7 +93,6 @@ class AutomationExtension extends Extension {
                         } else {
                             OnOff(light).turnOn();
                         }
-                        Brightness(light).setBrightness(100);
                     }
                 } else {
                     logger.debug('Presence stopped', {motionDeviceName: sensorDeviceName});
