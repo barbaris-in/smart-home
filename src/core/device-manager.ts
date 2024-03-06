@@ -50,7 +50,6 @@ export class DeviceManager {
         }
     }
 
-
     waitDevices(deviceNames: string[], callback: Function, timeoutCallback?: Function): void {
         const getMissing = (): string[] => {
             const missingDevices: string[] = [];
@@ -104,59 +103,59 @@ export class DeviceManager {
         return this.devicesById;
     }
 
-    // saveDevices(source: string, filename?: string): void {
-    //     if (!fs.existsSync('data')) {
-    //         fs.mkdirSync('data');
-    //     }
-    //     if (!filename) {
-    //         filename = `data/${source}.yaml`;
-    //     }
-    //
-    //     const devicesListPlain: any = {};
-    //     (<Devices>this.deviceSources.get(source)).forEach((device, key) => {
-    //         devicesListPlain[key] = {
-    //             name: device.name,
-    //             properties: Object.fromEntries(device.properties),
-    //             info: device.getInfo()
-    //         };
-    //     });
-    //
-    //     fs.writeFile(filename, '# DO NOT MODIFY THIS FILE MANUALLY\r\n' + yaml.dump(devicesListPlain), (err) => {
-    //         if (err) {
-    //             logger.error('Error saving devices cache file', err);
-    //         }
-    //     });
-    //     this.enableAutoSave(source);
-    // }
-    //
-    // protected enableAutoSave(source: string): void {
-    //     if (this.autoSaveIntervals[source]) {
-    //         return;
-    //     }
-    //     this.autoSaveIntervals[source] = setInterval(() => {
-    //         logger.debug('Saving devices', {source});
-    //         this.saveDevices(source);
-    //     }, 20 * 60 * 1000);
-    // }
-    //
-    // loadDevices(source: string, callback: Function, filename?: string): void {
-    //     if (!filename) {
-    //         filename = `data/${source}.yaml`;
-    //     }
-    //
-    //     const fileExists: boolean = fs.existsSync(filename);
-    //     if (!fileExists) {
-    //         logger.warn('Devices cache file does not exist. Skipping loading devices.', {filename});
-    //         return;
-    //     }
-    //
-    //     logger.debug('Loading devices from file', {filename});
-    //     const dataString: string = fs.readFileSync(filename, 'utf8');
-    //     const data: any = yaml.load(dataString);
-    //     for (const deviceId in data) {
-    //         callback(data[deviceId]);
-    //     }
-    // }
+    saveDevices(source: string, filename?: string): void {
+        if (!fs.existsSync('data')) {
+            fs.mkdirSync('data');
+        }
+        if (!filename) {
+            filename = `data/${source}.yaml`;
+        }
+
+        const devicesListPlain: any = {};
+        (<Devices>this.deviceSources.get(source)).forEach((device, key) => {
+            devicesListPlain[key] = {
+                name: device.name,
+                properties: Object.fromEntries(device.properties),
+                info: device.getInfo()
+            };
+        });
+
+        fs.writeFile(filename, '# DO NOT MODIFY THIS FILE MANUALLY\r\n' + yaml.dump(devicesListPlain), (err) => {
+            if (err) {
+                logger.error('Error saving devices cache file', err);
+            }
+        });
+        this.enableAutoSave(source);
+    }
+
+    protected enableAutoSave(source: string): void {
+        if (this.autoSaveIntervals[source]) {
+            return;
+        }
+        this.autoSaveIntervals[source] = setInterval(() => {
+            logger.debug('Saving devices', {source});
+            this.saveDevices(source);
+        }, 20 * 60 * 1000);
+    }
+
+    loadDevices(source: string, callback: Function, filename?: string): void {
+        if (!filename) {
+            filename = `data/${source}.yaml`;
+        }
+
+        const fileExists: boolean = fs.existsSync(filename);
+        if (!fileExists) {
+            logger.warn('Devices cache file does not exist. Skipping loading devices.', {filename});
+            return;
+        }
+
+        logger.debug('Loading devices from file', {filename});
+        const dataString: string = fs.readFileSync(filename, 'utf8');
+        const data: any = yaml.load(dataString);
+        for (const deviceId in data) {
+            callback(data[deviceId]);
+        }
+    }
 }
 
 export default new DeviceManager();
