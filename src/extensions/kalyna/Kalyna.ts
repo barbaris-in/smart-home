@@ -18,6 +18,7 @@ class AutomationExtension extends Extension {
         this.motion('Hallway Motion Sensor', 'Hallway Light', 60);
         this.presence('Bathroom Presence Sensor', 'Bathroom Mirror Light');
         this.motion('Kitchen Motion Sensor', '0x0000000008016701', 60 * 10);
+        this.motion('Bedroom Motion Sensor', 'Bedroom Bed Strip', 10);
 
         this.desktop();
 
