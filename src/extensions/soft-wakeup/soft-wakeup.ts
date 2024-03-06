@@ -15,7 +15,7 @@ class SoftWakeup extends Extension {
         rule.hour = 6;
         rule.minute = 30;
         this.job = scheduleJob(rule, (): void => {
-            deviceManager.waitDevices(['Office Desk Light'], () => {
+            deviceManager.waitDevices(['Bedroom Desk Light'], () => {
                 logger.debug("Wake up");
                 const bulb: Device = deviceManager.getDeviceByName('Office Desk Light');
                 bulb.emit('wakeup');
