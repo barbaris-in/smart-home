@@ -51,4 +51,13 @@ export class Device {
     public getInfo(): any {
         return this.info;
     }
+
+    toJSON(): any {
+        const traitsList: string[] = [];
+
+        return {
+            name: this.name,
+            traits: traitsList
+        };
+    }
 }

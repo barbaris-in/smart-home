@@ -5,6 +5,13 @@ import {Device} from "./device";
 const logger = require("./logger").logger('device-manager');
 
 export class Devices extends Map<string, Device> {
+    toJSON(): any {
+        const plain: any = {};
+        this.forEach((device, key) => {
+            plain[key] = device.toJSON();
+        });
+        return plain;
+    }
 }
 
 class DeviceSources extends Map<string, Devices> {

@@ -131,7 +131,7 @@ class MqttExtension extends Extension {
             logger.debug('Registering device', mqttDevice);
             deviceManager.registerDevice(this.deviceFromInfo(mqttDevice), 'mqtt');
         }
-        // deviceManager.saveDevices('mqtt');
+        deviceManager.saveDevices('mqtt');
     }
 
     constructor() {
