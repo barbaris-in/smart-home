@@ -24,21 +24,6 @@ class AutomationExtension extends Extension {
 
         this.door();
         this.sun();
-
-        // deviceManager.waitDevices(['Office Desk Light'], () => {
-        //     setTimeout(() => {
-        //        const officeDeskLight: Device = deviceManager.getDeviceByName('Office Desk Light');
-        //         // if (officeDeskLight.supports(OnOff)) {
-        //              Brightness(officeDeskLight).setBrightnessPercentage(1);
-        //         // }
-        //     });
-        // });
-        //
-        // const bulb: Device = deviceManager.getDeviceByName('Bedroom Desk Light');
-        // const chatId: number = parseFloat(process.env.TELEGRAM_CHAT_ID || '');
-        // bulb.on('wakeup', () => {
-        //     telegramBot.sendMessage(chatId, '🌅 Wake up', true);
-        // });
     }
 
     protected motion(motionDeviceName: string, lightDeviceName: string, timeout: number = 0) {
