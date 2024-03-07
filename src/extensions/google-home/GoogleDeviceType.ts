@@ -104,6 +104,9 @@ export default class GoogleDeviceType {
         if (device.name.toLowerCase().includes('light')) {
             return 'action.devices.types.LIGHT';
         }
+        if (device.name.toLowerCase().includes('strip')) {
+            return 'action.devices.types.LIGHT';
+        }
         if (device.name.toLowerCase().includes('plug')) {
             return 'action.devices.types.OUTLET';
         }
