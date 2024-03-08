@@ -6,7 +6,7 @@ import {Brightness} from "../../core/traits/Brightness";
 import {ColorTemperature} from "../../core/traits/ColorTemperature";
 import telegramBot from "../telegram-bot";
 import {Property} from "../../core/properties";
-import { SunDevice } from "../sun/Sun";
+import {SunDevice} from "../sun/Sun";
 
 const logger = require("../../core/logger").logger('kalyna');
 
@@ -24,6 +24,15 @@ class AutomationExtension extends Extension {
 
         this.door();
         this.sun();
+
+        deviceManager.waitDevices(['Hallway Motion Sensor'], () => {
+            deviceManager.getDevices().forEach((device: Device) => {
+                const l = require("../../core/logger").logger('kalyna-' + device.name.replace(/ /g, '-').toLowerCase().replace(',', ''));
+                device.on('property_changed', (args: {name: string, params: any}) => {
+                    l.debug('Property changed', {event: name, params: args.params});
+                });
+            });
+        });
     }
 
     protected motion(motionDeviceName: string, lightDeviceName: string, timeout: number = 0) {
