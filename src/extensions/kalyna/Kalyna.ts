@@ -29,7 +29,7 @@ class AutomationExtension extends Extension {
             deviceManager.getDevices().forEach((device: Device) => {
                 const l = require("../../core/logger").logger('kalyna-' + device.name.replace(/ /g, '-').toLowerCase().replace(',', ''));
                 device.on('property_changed', (args: {name: string, params: any}) => {
-                    l.debug('Property changed', {event: name, params: args.params});
+                    l.debug('Property changed', args);
                 });
             });
         });
