@@ -44,6 +44,10 @@ export class Device {
         actions.addCallback(this.name, propertyName + '_changed', callback);
     }
 
+    public setName(name: string): void {
+        this.name = name;
+    }
+
     public setInfo(info: any): void {
         this.info = info;
     }

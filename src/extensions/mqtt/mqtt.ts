@@ -167,6 +167,32 @@ class MqttExtension extends Extension {
                             break;
                     }
                     break;
+                case 'response':
+                    switch (topics[2]) {
+                        case 'device':
+                            switch (topics[3]) {
+                                case 'rename':
+                                    // {
+                                    //   "data": {
+                                    //     "from": "Tree Plug",
+                                    //     "homeassistant_rename": false,
+                                    //     "to": "Shelf Light"
+                                    //   },
+                                    //   "status": "ok",
+                                    //   "transaction": "a1qf8-1"
+                                    // }
+                                    logger.debug('Renaming device', eventParams);
+                                    try {
+                                        const device: Device = deviceManager.getDeviceByName(eventParams.data.from);
+                                        device.setName(eventParams.data.to);
+                                    } catch (e) {
+                                        logger.error('Could not rename device. Device not found', {params: eventParams.data.from, err: e});
+                                    }
+                                    break;
+                            }
+                            break;
+                    }
+                    break;
                 default:
                     const deviceName: string = topics[1];
                     try {
@@ -203,6 +229,7 @@ class MqttExtension extends Extension {
             logger.debug('Reconnecting to MQTT broker');
         });
     }
+
     //
     // public unload(): void {
     //     if (this.client !== null) {
