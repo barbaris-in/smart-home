@@ -102,7 +102,7 @@ class AutomationExtension extends Extension {
     }
 
     protected desktop() {
-        deviceManager.waitDevices(['Cube', 'Office Desk Light', 'Tree Plug'], () => {
+        deviceManager.waitDevices(['Cube', 'Office Desk Light'], () => {
             const cube: Device = deviceManager.getDeviceByName('Cube');
             const bulb: Device = deviceManager.getDeviceByName('Office Desk Light');
 
