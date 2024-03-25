@@ -1,6 +1,9 @@
 import actions from './actions';
 import {Properties, Property} from "./properties";
 import Trait from "./trait";
+import {Brightness} from "./traits/Brightness";
+import {OnOff} from "./traits/OnOff";
+import {ColorTemperature} from "./traits/ColorTemperature";
 
 export class Device {
     protected info: any;
@@ -17,7 +20,88 @@ export class Device {
     }
 
     setProperty(name: string, newValue: Property): void {
-        // fix this for boolean properties like `occupancy`
+        switch (name) {
+            case 'state':
+                if (this.supports(OnOff)) {
+                    OnOff(this).initOnOff(newValue === 'ON' || newValue === true);
+                }
+                break;
+            case 'brightness':
+                if (this.supports(Brightness)) {
+                    Brightness(this).initBrightness(newValue as number);
+                }
+                break;
+            // case 'color':
+            //     newValue = newValue;
+            //     break;
+            case 'color_temp':
+                if (this.supports(ColorTemperature)) {
+                    ColorTemperature(this).initColorTemperature(newValue as number);
+                }
+                break;
+            // case 'temperature':
+            //     newValue = parseInt(newValue, 10);
+            //     break;
+            // case 'humidity':
+            //     newValue = parseInt(newValue, 10);
+            //     break;
+            // case 'pressure':
+            //     newValue = parseInt(newValue, 10);
+            //     break;
+            // case 'motionDetected':
+            //     newValue = newValue === 'true' || newValue === true;
+            //     break;
+            // case 'open':
+            //     newValue = newValue === 'true' || newValue === true;
+            //     break;
+            // case 'lock':
+            //     newValue = newValue === 'true' || newValue === true;
+            //     break;
+            // case 'online':
+            //     newValue = newValue === 'true' || newValue === true;
+            //     break;
+            // case 'reachable':
+            //     newValue = newValue === 'true' || newValue === true;
+            //     break;
+            // case 'batteryLevel':
+            //     newValue = parseInt(newValue, 10);
+            //     break;
+            // case 'charging':
+            //     newValue = newValue === 'true' || newValue === true;
+            //     break;
+            // case 'lowBattery':
+            //     newValue = newValue === 'true' || newValue === true;
+            //     break;
+            // case 'smokeDetected':
+            //     newValue = newValue === 'true' || newValue === true;
+            //     break;
+            // case 'carbonMonoxideDetected':
+            //     newValue = newValue === 'true' || newValue === true;
+            //     break;
+            // case 'carbonDioxideDetected':
+            //     newValue = newValue === 'true' || newValue === true;
+            //     break;
+            // case 'contactSensor':
+            //     newValue = newValue === 'true' || newValue === true;
+            //     break;
+            // case 'leakDetected':
+            //     newValue = newValue === 'true' || newValue === true;
+            //     break;
+            // case 'occupancy':
+            //     newValue = newValue === 'true' || newValue === true;
+            //     break;
+            // case 'vibration':
+            //     newValue = newValue === 'true' || newValue === true;
+            //     break;
+            // case 'tamper':
+            //     newValue = newValue === 'true' || newValue === true;
+            //     break;
+            // case 'waterDetected':
+            //     newValue = newValue === 'true' || newValue === true;
+            //     break;
+            // default:
+            //     break;
+        }
         if (!this.properties.has(name)) {
         //     todo: new property
         } else {

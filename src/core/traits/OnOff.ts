@@ -25,6 +25,10 @@ export class OnOffTrait extends Trait {
             });
     }
 
+    initOnOff(onOff: boolean): void {
+        this.onOff = onOff;
+    }
+
     turnOn(): void {
         this.onOff = true;
         const deviceName = this.getDevice().name;

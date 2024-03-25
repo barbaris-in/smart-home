@@ -34,6 +34,10 @@ export class ColorTemperatureTrait extends Trait {
         return ColorTemperatureTrait.miradToKelvin(this.minColorTemperature);
     }
 
+    public initColorTemperature(colorTemperature: number): void {
+        this.colorTemperature = colorTemperature;
+    }
+
     public setColorTemperature(colorTemperature: number): void {
         this.colorTemperature = Math.max(this.minColorTemperature, Math.min(this.maxColorTemperature, colorTemperature))
         this.commandCallback(this.colorTemperature);

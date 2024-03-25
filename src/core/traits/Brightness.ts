@@ -36,6 +36,10 @@ export class BrightnessTrait extends Trait {
         return this.brightness;
     }
 
+    initBrightness(brightness: number): void {
+        this.brightness = brightness;
+    }
+
     setBrightness(brightness: number): void {
         this.brightness = Math.max(this.minBrightness, Math.min(this.maxBrightness, brightness));
         this.commandCallback(this.brightness);
