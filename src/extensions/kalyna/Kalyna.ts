@@ -7,6 +7,7 @@ import {ColorTemperature} from "../../core/traits/ColorTemperature";
 import telegramBot from "../telegram-bot";
 import {Property} from "../../core/properties";
 import {SunDevice} from "../sun/Sun";
+import {SecuritySystem, SecuritySystemTrait} from "../security-system/SecuritySystem";
 
 const logger = require("../../core/logger").logger('kalyna');
 
@@ -16,10 +17,13 @@ class AutomationExtension extends Extension {
         logger.debug("Running kalyna automations");
 
         this.motion('Hallway Motion Sensor', 'Hallway Light', 60);
+        this.motion('Hallway Motion Sensor', 'Hallway Desk Light', 60);
         this.presence('Bathroom Presence Sensor', 'Bathroom Mirror Light');
         this.motion('Kitchen Motion Sensor', '0x0000000008016701', 60 * 10);
+        this.motion('Kitchen Motion Sensor', 'Kitchen Light', 60 * 10);
         this.motion('Bedroom Motion Sensor', 'Bedroom Bed Strip', 10);
 
+        this.securitySystem();
         this.desktop();
 
         this.door();
@@ -28,9 +32,54 @@ class AutomationExtension extends Extension {
         deviceManager.waitDevices(['Hallway Motion Sensor'], () => {
             deviceManager.getDevices().forEach((device: Device) => {
                 const l = require("../../core/logger").logger('kalyna-' + device.name.replace(/ /g, '-').toLowerCase().replace(',', ''));
-                device.on('property_changed', (args: {name: string, params: any}) => {
+                device.on('property_changed', (args: { name: string, params: any }) => {
                     l.debug('Property changed', args);
                 });
+            });
+        });
+    }
+
+    protected securitySystem() {
+        deviceManager.waitDevices(['Security System'], () => {
+            const securitySystem = deviceManager.getDeviceByName('Security System');
+
+            deviceManager.waitDevices(['Bedroom Motion Sensor', 'Security System'], () => {
+                const securitySystem = deviceManager.getDeviceByName('Security System');
+                const motionSensor = deviceManager.getDeviceByName('Bedroom Motion Sensor');
+                motionSensor.on('occupancy_changed', (newValue: boolean) => {
+                });
+            });
+            deviceManager.waitDevices(['Door Sensor'], () => {
+                const doorSensor: Device = deviceManager.getDeviceByName('Door Sensor');
+                doorSensor.onPropertyChanged('contact', (newValue: Property) => {
+                    securitySystem.emit('alarm', {device: doorSensor.name, property: 'contact', newValue});
+                });
+            });
+
+            securitySystem.on('alarm', (args: {device: string, property: string, newValue: Property}) => {
+                const isArmed = SecuritySystem(securitySystem).isArmed();
+                const armLevelNum = SecuritySystem(securitySystem).getCurrentArmLevelNum();
+                if (SecuritySystem(securitySystem).isArmed() && SecuritySystem(securitySystem).getCurrentArmLevelNum() >= SecuritySystemTrait.levels['home_key']) {
+                    // if (newValue) {
+                        this.sendTelegramMessage('🚨 Motion detected');
+                        // logger.debug('Motion detected', {motionDeviceName: 'Bathroom Motion Sensor', params});
+                        // const light = deviceManager.getDeviceByName('Bathroom Mirror Light');
+                        // if (light.supports(OnOff)) {
+                        //     logger.debug('Light on', {lightDeviceName: 'Bathroom Mirror Light'});
+                        //     OnOff(light).turnOn();
+                        // }
+                    // } else {
+                        // send telegram message with emoji and text
+                        // this.sendTelegramMessage('Motion stopped');
+                        // this.sendTelegramMessage('Motion stopped');
+                        // const light: Device = deviceManager.getDeviceByName('Bathroom Mirror Light');
+                        // if (light.supports(OnOff)) {
+                        //     logger.debug('Light off', {lightDeviceName: 'Bathroom Mirror Light'});
+                        //     OnOff(light).turnOff();
+                        // }
+                    // }
+                }
+
             });
         });
     }
@@ -142,6 +191,11 @@ class AutomationExtension extends Extension {
                     });
             });
         });
+    }
+
+    protected sendTelegramMessage(message: string): void {
+        const chatId: number = parseFloat(process.env.TELEGRAM_CHAT_ID || '');
+        telegramBot.sendMessage(chatId, message);
     }
 
     protected door(): void {
