@@ -15,19 +15,27 @@ class SecuritySystemExtension extends Extension {
 
 export class SecuritySystemTrait extends Trait {
     protected armed: boolean = false;
-    protected currentArmLevel: string = '';
+    public static readonly levels: {disarmed_key: number, home_key: number, away_key: number} = {
+        disarmed_key: 0,
+        home_key: 1,
+        away_key: 2
+    };
+    protected currentArmLevel: keyof typeof SecuritySystemTrait.levels = 'disarmed_key';
+    protected currentArmLevelNum: number = 0;
 
     public initialize(): void {
     }
 
-    public arm(armLevel: string): void {
+
+    public arm(armLevel: keyof typeof SecuritySystemTrait.levels): void {
         this.armed = true;
         this.currentArmLevel = armLevel;
+        this.currentArmLevelNum = SecuritySystemTrait.levels[armLevel];
     }
 
     public disarm(): void {
         this.armed = false;
-        this.currentArmLevel = '';
+        this.currentArmLevel = 'disarmed_key';
     }
 
     public isArmed(): boolean {
@@ -36,6 +44,10 @@ export class SecuritySystemTrait extends Trait {
 
     getCurrentArmLevel(): string {
         return this.currentArmLevel;
+    }
+
+    getCurrentArmLevelNum(): number {
+        return this.currentArmLevelNum;
     }
 }
 
