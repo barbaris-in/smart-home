@@ -32,6 +32,7 @@ class KalynaAutomation extends Extension {
         this.water();
         this.smoke();
         this.gas();
+        this.sendTelegramMessage('🤖 Kalyna is running');
     }
 
     protected water() {
