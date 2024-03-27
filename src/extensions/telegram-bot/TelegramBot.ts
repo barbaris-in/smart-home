@@ -1,10 +1,12 @@
 import Extension from "../../core/abstract-extension";
 import {Context, Telegraf} from "telegraf";
+import Queue from "./queue";
 
 const logger = require('../../core/logger').logger('telegram');
 
 class TelegramBot extends Extension {
-    public readonly bot: Telegraf<Context>;
+    private readonly bot: Telegraf<Context>;
+    private readonly telegramQueue: Queue;
 
     constructor(name: string) {
         super(name);
@@ -12,13 +14,24 @@ class TelegramBot extends Extension {
             throw Error('Telegram access token is not set!');
         })());
 
-        this.bot.start((ctx) => {
-            ctx.reply('Welcome!');
-            logger.debug('Bot started', ctx);
-        });
+        this.telegramQueue = new Queue((): Promise<void> => {
+                this.bot.start((ctx) => {
+                    ctx.reply('Welcome!');
+                    logger.debug('Bot started', ctx);
+                });
+                this.bot.launch().then(() => {
+                    logger.debug('Telegram bot started');
+                });
 
-        this.bot.launch().then(() => {
-        });
+                return new Promise((resolve, reject) => {
+                    resolve();
+                });
+            }, (target: number, message: string) => {
+                logger.debug('Telegram send message', {target, message});
+                this.bot.telegram.sendMessage(target, message)
+                    .catch((e) => logger.error('Error sending message', {message, e}));
+            },
+            5000);
     }
 
     destructor(): void {
@@ -28,7 +41,7 @@ class TelegramBot extends Extension {
 
     sendMessage(chatId: number, message: string, silent: boolean = false): void {
         // toto: implement silent mode
-        this.bot.telegram.sendMessage(chatId, message).catch((e) => logger.error('Error sending message', {message, e}));
+        this.telegramQueue.add(chatId, message);
     }
 }
 
