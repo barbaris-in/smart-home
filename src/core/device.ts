@@ -102,14 +102,13 @@ export class Device {
             // default:
             //     break;
         }
-        if (!this.properties.has(name)) {
-        //     todo: new property
-        } else {
-            const oldValue = this.properties.get(name);
-            if (oldValue !== newValue) {
-                this.emit('property_changed', {name, newValue});
-                this.emit(name + '_changed', newValue);
-            }
+        let oldValue = null;
+        if (this.properties.has(name)) {
+            oldValue = this.properties.get(name);
+        }
+        if (oldValue !== newValue) {
+            this.emit('property_changed', {name, newValue, oldValue});
+            this.emit(name + '_changed', {newValue, oldValue});
         }
         this.properties.set(name, newValue);
     }

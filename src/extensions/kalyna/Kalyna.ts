@@ -11,17 +11,17 @@ import {SecuritySystem, SecuritySystemTrait} from "../security-system/SecuritySy
 
 const logger = require("../../core/logger").logger('kalyna');
 
-class AutomationExtension extends Extension {
+class KalynaAutomation extends Extension {
     constructor(name: string) {
         super(name);
         logger.debug("Running kalyna automations");
 
-        this.motion('Hallway Motion Sensor', 'Hallway Light', 60);
+        this.motion('Hallway Motion Sensor', 'Hallway Main Light', 60);
         this.motion('Hallway Motion Sensor', 'Hallway Desk Light', 60);
         this.presence('Bathroom Presence Sensor', 'Bathroom Mirror Light');
         this.motion('Kitchen Motion Sensor', '0x0000000008016701', 60 * 10);
-        this.motion('Kitchen Motion Sensor', 'Kitchen Light', 60 * 10);
-        this.motion('Bedroom Motion Sensor', 'Bedroom Bed Strip', 10);
+        this.motion('Kitchen Motion Sensor', 'Kitchen Main Light', 60 * 10);
+        // this.motion('Living Room Motion Sensor', 'Bedroom Bed Strip', 10);
 
         this.securitySystem();
         this.desktop();
@@ -29,12 +29,55 @@ class AutomationExtension extends Extension {
         this.door();
         this.sun();
 
-        deviceManager.waitDevices(['Hallway Motion Sensor'], () => {
-            deviceManager.getDevices().forEach((device: Device) => {
-                const l = require("../../core/logger").logger('kalyna-' + device.name.replace(/ /g, '-').toLowerCase().replace(',', ''));
-                device.on('property_changed', (args: { name: string, params: any }) => {
-                    l.debug('Property changed', args);
-                });
+        this.water();
+        this.smoke();
+        this.gas();
+    }
+
+    protected water() {
+        deviceManager.waitDevices(['Bathroom Water Leak Sensor'], () => {
+            const waterSensor = deviceManager.getDeviceByName('Bathroom Water Leak Sensor');
+            waterSensor.onPropertyChanged('water_leak', (args: any) => {
+                if (args.newValue) {
+                    this.sendTelegramMessage('⚠️');
+                    this.sendTelegramMessage('💧 Water leak detected');
+                } else {
+                    if (args.oldValue !== null && args.oldValue === true) {
+                        this.sendTelegramMessage('💧 Water leak stopped');
+                    }
+                }
+            });
+        });
+    }
+
+    protected smoke() {
+        deviceManager.waitDevices(['Smoke Detector'], () => {
+            const smokeDetector = deviceManager.getDeviceByName('Smoke Detector');
+            smokeDetector.onPropertyChanged('smoke', (args: any) => {
+                if (args.newValue) {
+                    this.sendTelegramMessage('⚠️');
+                    this.sendTelegramMessage('🔥 Smoke detected');
+                } else {
+                    if (args.oldValue !== null && args.oldValue === true) {
+                        this.sendTelegramMessage('🔥 Smoke stopped');
+                    }
+                }
+            });
+        });
+    }
+
+    protected gas() {
+        deviceManager.waitDevices(['Gas Detector'], () => {
+            const gasDetector = deviceManager.getDeviceByName('Gas Detector');
+            gasDetector.onPropertyChanged('gas', (args: any) => {
+                if (args.newValue) {
+                    this.sendTelegramMessage('⚠️');
+                    this.sendTelegramMessage('💨 Gas detected');
+                } else {
+                    if (args.oldValue !== null && args.oldValue === true) {
+                        this.sendTelegramMessage('💨 Gas stopped');
+                    }
+                }
             });
         });
     }
@@ -43,16 +86,16 @@ class AutomationExtension extends Extension {
         deviceManager.waitDevices(['Security System'], () => {
             const securitySystem = deviceManager.getDeviceByName('Security System');
 
-            deviceManager.waitDevices(['Bedroom Motion Sensor', 'Security System'], () => {
+            deviceManager.waitDevices(['Living Room Motion Sensor', 'Security System'], () => {
                 const securitySystem = deviceManager.getDeviceByName('Security System');
-                const motionSensor = deviceManager.getDeviceByName('Bedroom Motion Sensor');
-                motionSensor.on('occupancy_changed', (newValue: boolean) => {
+                const motionSensor = deviceManager.getDeviceByName('Living Room Motion Sensor');
+                motionSensor.on('occupancy_changed', (args: {}) => {
                 });
             });
             deviceManager.waitDevices(['Door Sensor'], () => {
                 const doorSensor: Device = deviceManager.getDeviceByName('Door Sensor');
-                doorSensor.onPropertyChanged('contact', (newValue: Property) => {
-                    securitySystem.emit('alarm', {device: doorSensor.name, property: 'contact', newValue});
+                doorSensor.onPropertyChanged('contact', (args: any) => {
+                    securitySystem.emit('alarm', {device: doorSensor.name, property: 'contact', newValue: args.newValue});
                 });
             });
 
@@ -119,7 +162,8 @@ class AutomationExtension extends Extension {
         deviceManager.waitDevices(devices, () => {
             const motionSensor = deviceManager.getDeviceByName(sensorDeviceName);
             logger.debug('Automate', {motionDeviceName: sensorDeviceName, lightDeviceName});
-            motionSensor.on('presence_changed', (newValue: any) => {
+            motionSensor.on('presence_changed', (args: any) => {
+                const newValue = args.newValue;
                 if (newValue) {
                     logger.debug('Presence detected', {motionDeviceName: sensorDeviceName});
                     const light = deviceManager.getDeviceByName(lightDeviceName);
@@ -201,13 +245,12 @@ class AutomationExtension extends Extension {
     protected door(): void {
         deviceManager.waitDevices(['Door Sensor'], () => {
             const doorSensor: Device = deviceManager.getDeviceByName('Door Sensor');
-            const chatId: number = parseFloat(process.env.TELEGRAM_CHAT_ID || '');
             let doorTimer: NodeJS.Timeout | null = null;
-            doorSensor.onPropertyChanged('contact', (newValue: Property) => {
-                if (newValue === false) {
-                    telegramBot.sendMessage(chatId, '🚪 Door');
+            doorSensor.onPropertyChanged('contact', (args: any) => {
+                if (args.newValue === false) {
+                    this.sendTelegramMessage('🚪 Door');
                     doorTimer = setTimeout((): void => {
-                        telegramBot.sendMessage(chatId, '🚪 Door still open');
+                        this.sendTelegramMessage('🚪 Door still open');
                         doorTimer = null;
                     }, 1000 * 60 * 2);
                 } else {
@@ -215,7 +258,9 @@ class AutomationExtension extends Extension {
                         clearTimeout(doorTimer);
                         doorTimer = null;
                     } else {
-                        telegramBot.sendMessage(chatId, '🚪 Door closed');
+                        if (args.oldValue !== null && args.oldValue === false) {
+                            this.sendTelegramMessage('🚪 Door closed');
+                        }
                     }
                 }
             });
@@ -238,4 +283,4 @@ class AutomationExtension extends Extension {
 
 }
 
-export default new AutomationExtension('kalyna-automations');
+export default new KalynaAutomation('kalyna-automations');

@@ -2,6 +2,7 @@ import {Device} from "../../core/device";
 import Trait from "../../core/trait";
 import Extension from "../../core/abstract-extension";
 import deviceManager from "../../core/device-manager";
+const logger = require("../../core/logger").logger('security-system');
 
 class SecuritySystemExtension extends Extension {
     constructor(name: string) {
@@ -28,12 +29,14 @@ export class SecuritySystemTrait extends Trait {
 
 
     public arm(armLevel: keyof typeof SecuritySystemTrait.levels): void {
+        logger.info('Arming security system', {armLevel});
         this.armed = true;
         this.currentArmLevel = armLevel;
         this.currentArmLevelNum = SecuritySystemTrait.levels[armLevel];
     }
 
     public disarm(): void {
+        logger.info('Disarming security system');
         this.armed = false;
         this.currentArmLevel = 'disarmed_key';
     }
