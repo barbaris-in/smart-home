@@ -8,6 +8,7 @@ import telegramBot from "../telegram-bot";
 import {Property} from "../../core/properties";
 import {SunDevice} from "../sun/Sun";
 import {SecuritySystem, SecuritySystemTrait} from "../security-system/SecuritySystem";
+import Sound from "../../core/sound";
 
 const logger = require("../../core/logger").logger('kalyna');
 
@@ -15,12 +16,26 @@ class KalynaAutomation extends Extension {
     constructor(name: string) {
         super(name);
         logger.debug("Running kalyna automations");
+        Sound.play('/etc/sound/login.wav').catch((e: any) => {
+            logger.error(e);
+        });
+        deviceManager.waitDevices(['Bedroom Desk Switch'], () => {
+            const switchDevice = deviceManager.getDeviceByName('Bedroom Desk Switch');
+            switchDevice.on('single', (args: any) => {
+                Sound.play('/etc/sound/startup.wav').catch((e: any) => {
+                    logger.error(e);
+                });
+            });
+        });
 
         this.motion('Hallway Motion Sensor', 'Hallway Main Light', 60);
         this.motion('Hallway Motion Sensor', 'Hallway Desk Light', 60);
+        this.motion('Living Room Motion Sensor', 'Living Room Wall Light 1', 0);
         this.presence('Bathroom Presence Sensor', 'Bathroom Mirror Light');
         this.motion('Kitchen Motion Sensor', '0x0000000008016701', 60 * 10);
         this.motion('Kitchen Motion Sensor', 'Kitchen Main Light', 60 * 10);
+        this.livingRoom();
+        this.kitchen();
         // this.motion('Living Room Motion Sensor', 'Bedroom Bed Strip', 10);
 
         this.securitySystem();
@@ -100,27 +115,27 @@ class KalynaAutomation extends Extension {
                 });
             });
 
-            securitySystem.on('alarm', (args: {device: string, property: string, newValue: Property}) => {
+            securitySystem.on('alarm', (args: { device: string, property: string, newValue: Property }) => {
                 const isArmed = SecuritySystem(securitySystem).isArmed();
                 const armLevelNum = SecuritySystem(securitySystem).getCurrentArmLevelNum();
                 if (SecuritySystem(securitySystem).isArmed() && SecuritySystem(securitySystem).getCurrentArmLevelNum() >= SecuritySystemTrait.levels['home_key']) {
                     // if (newValue) {
-                        this.sendTelegramMessage('🚨 Motion detected');
-                        // logger.debug('Motion detected', {motionDeviceName: 'Bathroom Motion Sensor', params});
-                        // const light = deviceManager.getDeviceByName('Bathroom Mirror Light');
-                        // if (light.supports(OnOff)) {
-                        //     logger.debug('Light on', {lightDeviceName: 'Bathroom Mirror Light'});
-                        //     OnOff(light).turnOn();
-                        // }
+                    this.sendTelegramMessage('🚨 Motion detected');
+                    // logger.debug('Motion detected', {motionDeviceName: 'Bathroom Motion Sensor', params});
+                    // const light = deviceManager.getDeviceByName('Bathroom Mirror Light');
+                    // if (light.supports(OnOff)) {
+                    //     logger.debug('Light on', {lightDeviceName: 'Bathroom Mirror Light'});
+                    //     OnOff(light).turnOn();
+                    // }
                     // } else {
-                        // send telegram message with emoji and text
-                        // this.sendTelegramMessage('Motion stopped');
-                        // this.sendTelegramMessage('Motion stopped');
-                        // const light: Device = deviceManager.getDeviceByName('Bathroom Mirror Light');
-                        // if (light.supports(OnOff)) {
-                        //     logger.debug('Light off', {lightDeviceName: 'Bathroom Mirror Light'});
-                        //     OnOff(light).turnOff();
-                        // }
+                    // send telegram message with emoji and text
+                    // this.sendTelegramMessage('Motion stopped');
+                    // this.sendTelegramMessage('Motion stopped');
+                    // const light: Device = deviceManager.getDeviceByName('Bathroom Mirror Light');
+                    // if (light.supports(OnOff)) {
+                    //     logger.debug('Light off', {lightDeviceName: 'Bathroom Mirror Light'});
+                    //     OnOff(light).turnOff();
+                    // }
                     // }
                 }
 
@@ -282,6 +297,68 @@ class KalynaAutomation extends Extension {
         });
     }
 
+    private kitchen() {
+        deviceManager.waitDevices(['Kitchen Switch'], () => {
+            deviceManager.waitDevices(['Kitchen Main Light'], () => {
+                const wallSwitch = deviceManager.getDeviceByName('Kitchen Switch');
+                wallSwitch.on('single', (args: any) => {
+                    const light = deviceManager.getDeviceByName('Kitchen Main Light');
+                    if (light.supports(OnOff)) {
+                        OnOff(light).toggle();
+                    }
+                });
+            });
+        });
+    }
+
+    private livingRoom() {
+        deviceManager.waitDevices(['Living Room Wall Switch'], () => {
+            const wallSwitch = deviceManager.getDeviceByName('Living Room Wall Switch');
+
+            deviceManager.waitDevices(['Living Room Main Light'], () => {
+                wallSwitch.on('single_left', (args: any) => {
+                    const light = deviceManager.getDeviceByName('Living Room Main Light');
+                    if (light.supports(OnOff)) {
+                        OnOff(light).toggle();
+                    }
+                });
+            });
+            deviceManager.waitDevices(['Living Room Wall Light 1'], () => {
+                wallSwitch.on('single_right', (args: any) => {
+                    const light = deviceManager.getDeviceByName('Living Room Wall Light 1');
+                    if (light.supports(OnOff)) {
+                        OnOff(light).toggle();
+                    }
+                });
+            });
+        });
+
+        deviceManager.waitDevices(['Living Room Motion Sensor'], () => {
+            const motionSensor = deviceManager.getDeviceByName('Living Room Motion Sensor');
+            deviceManager.waitDevices(['Living Room Main Light'], () => {
+                const light = deviceManager.getDeviceByName('Living Room Main Light');
+                motionSensor.on('occupancy_changed', (args: any) => {
+                    if (args.newValue) {
+                    } else {
+                        if (light.supports(OnOff)) {
+                            OnOff(light).turnOff();
+                        }
+                    }
+                });
+            });
+            // deviceManager.waitDevices(['Living Room Wall Light 1'], () => {
+            //     const light = deviceManager.getDeviceByName('Living Room Wall Light 1');
+            //     motionSensor.on('occupancy_changed', (args: any) => {
+            //         if (args.newValue) {
+            //         } else {
+            //             if (light.supports(OnOff)) {
+            //                 OnOff(light).turnOff();
+            //             }
+            //         }
+            //     });
+            // });
+        })
+    }
 }
 
 export default new KalynaAutomation('kalyna-automations');
