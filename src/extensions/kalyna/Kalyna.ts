@@ -52,8 +52,8 @@ class KalynaAutomation extends Extension {
     }
 
     protected smoke() {
-        deviceManager.waitDevices(['Smoke Detector'], () => {
-            const smokeDetector = deviceManager.getDeviceByName('Smoke Detector');
+        deviceManager.waitDevices(['Smoke Sensor'], () => {
+            const smokeDetector = deviceManager.getDeviceByName('Smoke Sensor');
             smokeDetector.onPropertyChanged('smoke', (args: any) => {
                 if (args.newValue) {
                     this.sendTelegramMessage('⚠️');
@@ -68,8 +68,8 @@ class KalynaAutomation extends Extension {
     }
 
     protected gas() {
-        deviceManager.waitDevices(['Gas Detector'], () => {
-            const gasDetector = deviceManager.getDeviceByName('Gas Detector');
+        deviceManager.waitDevices(['Gas Sensor'], () => {
+            const gasDetector = deviceManager.getDeviceByName('Gas Sensor');
             gasDetector.onPropertyChanged('gas', (args: any) => {
                 if (args.newValue) {
                     this.sendTelegramMessage('⚠️');
